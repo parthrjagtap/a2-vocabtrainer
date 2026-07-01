@@ -1,0 +1,2020 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vokabeltrainer A2</title>
+<style>
+  :root{
+    --bg:#11151c;
+    --panel:#1b212c;
+    --panel-2:#222a37;
+    --flap:#f0e6d2;
+    --flap-shadow:#0a0d12;
+    --amber:#e8a33d;
+    --red:#d8482f;
+    --text:#f0e6d2;
+    --muted:#8a93a8;
+    --success:#4caf7d;
+    --line:#2c3645;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;
+  }
+  .display{
+    font-family:"Bahnschrift","Arial Narrow",Impact,sans-serif;
+    font-weight:700;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+  }
+  .mono{
+    font-family:ui-monospace,"SF Mono",Consolas,monospace;
+  }
+  header{
+    padding:18px 16px 14px;
+    border-bottom:3px solid var(--amber);
+    background:linear-gradient(180deg,#161b24,#11151c);
+    position:sticky; top:0; z-index:10;
+  }
+  header .row{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  header h1{
+    font-size:1.15rem; margin:0;
+    color:var(--flap);
+  }
+  header .sub{color:var(--muted); font-size:0.72rem; margin-top:2px;}
+  .backbtn{
+    background:none; border:1px solid var(--line); color:var(--muted);
+    border-radius:6px; padding:6px 10px; font-size:0.78rem; cursor:pointer;
+  }
+  .backbtn:active{background:var(--panel-2);}
+  main{padding:14px 14px 80px; max-width:640px; margin:0 auto;}
+
+  /* deck list */
+  .deck-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:5px solid var(--amber);
+    border-radius:10px;
+    padding:14px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+    display:flex; justify-content:space-between; align-items:center;
+    gap:10px;
+  }
+  .deck-card:active{background:var(--panel-2);}
+  .deck-card .name{font-size:1rem; font-weight:600;}
+  .deck-card .meta{color:var(--muted); font-size:0.75rem; margin-top:4px;}
+  .deck-card .stat{text-align:right;}
+  .deck-card .due{color:var(--red); font-weight:700; font-family:ui-monospace,monospace; font-size:1.1rem;}
+  .deck-card .duelabel{color:var(--muted); font-size:0.68rem;}
+  .progress-bar{height:5px; background:var(--line); border-radius:3px; margin-top:8px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--success);}
+
+  /* tabs */
+  .tabs{display:flex; gap:8px; margin-bottom:14px;}
+  .tab{
+    flex:1; text-align:center; padding:9px 0; border-radius:8px;
+    border:1px solid var(--line); color:var(--muted); cursor:pointer; font-size:0.85rem;
+  }
+  .tab.active{background:var(--amber); color:#1a1206; border-color:var(--amber); font-weight:700;}
+
+  /* browse list */
+  .word-row{
+    display:flex; justify-content:space-between; gap:10px;
+    padding:10px 4px; border-bottom:1px solid var(--line);
+  }
+  .word-row .de{font-weight:600;}
+  .word-row .type{color:var(--amber); font-size:0.68rem; text-transform:uppercase; margin-left:6px;}
+  .word-row .en{color:var(--muted); text-align:right; max-width:48%; font-size:0.88rem;}
+  .ex{color:var(--muted); font-size:0.75rem; font-style:italic; margin-top:2px;}
+
+  /* flashcard */
+  .session-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:14px; color:var(--muted); font-size:0.8rem;
+  }
+  .session-progress{flex:1; height:4px; background:var(--line); border-radius:2px; margin:0 10px; overflow:hidden;}
+  .session-progress-fill{height:100%; background:var(--amber);}
+
+  .flip-scene{ perspective:1400px; margin:0 auto 18px; max-width:480px; }
+  .flip-card{
+    position:relative; width:100%; min-height:230px;
+    transform-style:preserve-3d;
+    transition:transform 0.5s cubic-bezier(.4,.2,.2,1);
+    cursor:pointer;
+  }
+  .flip-card.flipped{transform:rotateY(180deg);}
+  .face{
+    position:absolute; inset:0;
+    background:var(--flap);
+    color:#1a1206;
+    border-radius:12px;
+    backface-visibility:hidden;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:26px 20px;
+    box-shadow:0 10px 0 var(--flap-shadow), 0 14px 24px rgba(0,0,0,0.4);
+  }
+  .face::before{
+    content:""; position:absolute; left:0; right:0; top:50%;
+    height:1px; background:rgba(0,0,0,0.18);
+  }
+  .face .tag{
+    position:absolute; top:12px; left:16px;
+    font-size:0.65rem; color:var(--red); font-weight:700; text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  .face .box-indicator{
+    position:absolute; top:12px; right:16px;
+    font-size:0.65rem; color:#8a7a4d; font-family:ui-monospace,monospace;
+  }
+  .face .main-word{
+    font-size:1.9rem; font-weight:800; text-align:center; line-height:1.2;
+    font-family:"Bahnschrift","Arial Narrow",sans-serif;
+  }
+  .back-face{transform:rotateY(180deg); background:#1b212c; color:var(--flap);}
+  .back-face .main-word{font-size:1.5rem; color:var(--amber);}
+  .back-face .example{
+    margin-top:14px; font-size:0.85rem; color:var(--muted); font-style:italic; text-align:center; max-width:380px;
+  }
+  .hint{text-align:center; color:var(--muted); font-size:0.75rem; margin-bottom:16px;}
+
+  .answer-buttons{display:flex; gap:10px;}
+  .ans-btn{
+    flex:1; padding:14px 0; border-radius:10px; border:none; font-weight:700; font-size:0.9rem; cursor:pointer;
+  }
+  .ans-again{background:#3a2530; color:#f0a3a3;}
+  .ans-again:active{background:#4a2e3c;}
+  .ans-good{background:var(--success); color:#0c2418;}
+  .ans-good:active{background:#3f9968;}
+
+  .empty-state{
+    text-align:center; padding:50px 20px; color:var(--muted);
+  }
+  .empty-state .big{font-size:2.2rem; margin-bottom:8px;}
+
+  .summary{
+    text-align:center; padding:40px 20px;
+  }
+  .summary .num{font-size:3rem; font-family:ui-monospace,monospace; color:var(--success);}
+  .summary p{color:var(--muted);}
+  .primary-btn{
+    background:var(--amber); color:#1a1206; border:none; border-radius:10px;
+    padding:12px 24px; font-weight:700; cursor:pointer; font-size:0.9rem; margin-top:16px;
+  }
+
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="row">
+    <div>
+      <h1 id="headerTitle" class="display">VOKABELTRAINER A2</h1>
+      <div class="sub" id="headerSub">Goethe-Zertifikat &middot; Wortliste</div>
+    </div>
+    <button class="backbtn" id="backBtn" style="display:none;">&larr; Decks</button>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<script>
+/* =========================================================
+   DATA — Goethe A2 Wortliste
+   Decks: Wortgruppen (full) + Alphabetical batches (A done; B-Z coming)
+   ========================================================= */
+const WORDS = [
+// ---------- ZAHLEN ----------
+...[
+["eins","1"],["zwei","2"],["drei","3"],["vier","4"],["fünf","5"],["sechs","6"],["sieben","7"],
+["acht","8"],["neun","9"],["zehn","10"],["elf","11"],["zwölf","12"],["dreizehn","13"],["vierzehn","14"],
+["fünfzehn","15"],["sechzehn","16"],["siebzehn","17"],["achtzehn","18"],["neunzehn","19"],["zwanzig","20"],
+["einundzwanzig","21"],["dreißig","30"],["vierzig","40"],["fünfzig","50"],["sechzig","60"],["siebzig","70"],
+["achtzig","80"],["neunzig","90"],["(ein)hundert","100"],["hunderteins","101"],["zweihundert","200"],
+["(ein)tausend","1000"],["zweitausendeins","2001"],["eine Million","1,000,000"]
+].map(([de,en])=>({de,en,type:"num",ex:"",deck:"Zahlen"})),
+...[
+["der/die erste","the first"],["der/die zweite","the second"],["der/die dritte","the third"],["der/die vierte","the fourth"],
+["erstens","firstly"],["zweitens","secondly"],["drittens","thirdly"],["viertens","fourthly"],
+["einmal","once"],["zweimal","twice"],["dreimal","three times"],["viermal","four times"]
+].map(([de,en])=>({de,en,type:"num",ex:"",deck:"Zahlen"})),
+
+// ---------- ZEIT & KALENDER ----------
+...[
+["der Montag","Monday"],["der Dienstag","Tuesday"],["der Mittwoch","Wednesday"],["der Donnerstag","Thursday"],
+["der Freitag","Friday"],["der Samstag","Saturday"],["der Sonntag","Sunday"],
+["am Wochenende","on the weekend"],["der Arbeitstag / Werktag","workday"],["der Feiertag","public holiday"]
+].map(([de,en])=>({de,en,type:"n.",ex:"",deck:"Zeit & Kalender"})),
+...[
+["Januar","January"],["Februar","February"],["März","March"],["April","April"],["Mai","May"],["Juni","June"],
+["Juli","July"],["August","August"],["September","September"],["Oktober","October"],["November","November"],["Dezember","December"]
+].map(([de,en])=>({de,en,type:"n.",ex:"",deck:"Zeit & Kalender"})),
+...[
+["der Frühling / das Frühjahr","spring"],["der Sommer","summer"],["der Herbst","autumn"],["der Winter","winter"]
+].map(([de,en])=>({de,en,type:"n.",ex:"",deck:"Zeit & Kalender"})),
+...[
+["der Tag","day"],["der Morgen","morning"],["der Vormittag","late morning"],["der Mittag","noon"],
+["der Nachmittag","afternoon"],["der Abend","evening"],["die Nacht","night"],["die Mitternacht","midnight"],
+["täglich, tagsüber","daily, during the day"],["morgens, am Morgen","in the morning"],
+["vormittags, am Vormittag","in the late morning"],["mittags, am Mittag","at noon"],
+["nachmittags, am Nachmittag","in the afternoon"],["abends, am Abend","in the evening"],
+["nachts, in der Nacht","at night"],["um Mitternacht","at midnight"]
+].map(([de,en])=>({de,en,type:"n./adv.",ex:"",deck:"Zeit & Kalender"})),
+...[
+["die Sekunde","second"],["die Minute","minute"],["die Stunde","hour"],["die Woche","week"],["das Jahr","year"]
+].map(([de,en])=>({de,en,type:"n.",ex:"",deck:"Zeit & Kalender"})),
+...[
+["Karneval","Carnival"],["Ostern","Easter"],["Weihnachten","Christmas"],["Neujahr / Silvester","New Year / New Year's Eve"]
+].map(([de,en])=>({de,en,type:"n.",ex:"",deck:"Zeit & Kalender"})),
+
+// ---------- FAMILIE ----------
+...[
+["der Bruder","brother","Mein Bruder wohnt in Berlin."],
+["der Cousin","male cousin","Mein Cousin kommt aus Spanien."],
+["die Cousine","female cousin","Meine Cousine ist Ärztin."],
+["die Eltern (Pl.)","parents","Meine Eltern wohnen in München."],
+["der Enkel","grandson","Der Enkel besucht die Großeltern."],
+["die Enkelin","granddaughter","Die Enkelin ist noch klein."],
+["die Geschwister (Pl.)","siblings","Ich habe zwei Geschwister."],
+["die Großeltern (Pl.)","grandparents","Die Großeltern leben auf dem Land."],
+["die Großmutter (Oma)","grandmother","Meine Oma backt gern Kuchen."],
+["der Großvater (Opa)","grandfather","Mein Opa liest viel."],
+["das Kind","child","Wie viele Kinder haben Sie?"],
+["die Mutter (Mama)","mother","Meine Mutter arbeitet als Lehrerin."],
+["der Onkel","uncle","Mein Onkel ist Arzt."],
+["die Schwester","sister","Meine Schwester studiert in Köln."],
+["der Sohn","son","Mein Sohn geht zur Schule."],
+["die Tante","aunt","Meine Tante wohnt in Hamburg."],
+["die Tochter","daughter","Meine Tochter ist drei Jahre alt."],
+["der Vater (Papa)","father","Mein Vater arbeitet bei Siemens."],
+["die Verwandten","relatives","Wir besuchen unsere Verwandten."]
+].map(([de,en,ex])=>({de,en,type:"n.",ex,deck:"Familie & Beruf"})),
+...[
+["ledig","single","Ich bin ledig."],
+["verheiratet","married","Sie ist glücklich verheiratet."],
+["getrennt / geschieden","separated / divorced","Meine Eltern sind geschieden."]
+].map(([de,en,ex])=>({de,en,type:"adj.",ex,deck:"Familie & Beruf"})),
+
+// ---------- BERUFE ----------
+...[
+["der/die Angestellte","employee","Er ist Angestellter bei einer Bank."],
+["der Arzt / die Ärztin","doctor","Meine Schwester ist Ärztin."],
+["der/die Auszubildende","trainee, apprentice","Sie ist Auszubildende bei BMW."],
+["der Autor / die Autorin","author","Der Autor liest aus seinem Buch."],
+["der Babysitter","babysitter","Meine Tochter arbeitet als Babysitter."],
+["der Bäcker / die Bäckerin","baker","Der Bäcker macht frisches Brot."],
+["der Doktor / die Doktorin","doctor","Frau Doktor Weiß hat Sprechstunde."],
+["der Fahrer / die Fahrerin","driver","Der Taxifahrer kennt die Stadt gut."],
+["der Friseur / die Friseurin","hairdresser","Ich gehe zum Friseur."],
+["der Handwerker / die Handwerkerin","craftsperson","Wir brauchen einen Handwerker."],
+["der Hausmann / die Hausfrau","house-husband / housewife","Mein Vater ist Hausmann."],
+["der Journalist / die Journalistin","journalist","Sie arbeitet als Journalistin."],
+["der Kaufmann / die Kauffrau","businessman / businesswoman","Er ist Kaufmann von Beruf."],
+["der Kellner / die Kellnerin","waiter / waitress","Der Kellner bringt die Speisekarte."],
+["der Koch / die Köchin","cook, chef","Mein Onkel ist Koch in einem Restaurant."],
+["der Krankenpfleger / die Krankenschwester","nurse","Die Krankenschwester ist sehr nett."],
+["der Künstler / die Künstlerin","artist","Picasso war ein berühmter Künstler."],
+["der Lehrer / die Lehrerin","teacher","Mein Lehrer erklärt sehr gut."],
+["der Mechaniker / die Mechanikerin","mechanic","Der Mechaniker repariert mein Auto."],
+["das Model","model","Sie arbeitet als Model."],
+["der Musiker / die Musikerin","musician","Er ist Musiker und spielt Gitarre."],
+["der Polizist / die Polizistin","police officer","Die Polizistin hilft uns."],
+["der Rentner / die Rentnerin","retiree","Mein Opa ist Rentner."],
+["der Sänger / die Sängerin","singer","Die Sängerin ist sehr bekannt."],
+["der Schauspieler / die Schauspielerin","actor / actress","Er ist Schauspieler am Theater."],
+["der Techniker / die Technikerin","technician","Der Techniker repariert den Computer."],
+["der Verkäufer / die Verkäuferin","salesperson","Die Verkäuferin ist sehr freundlich."]
+].map(([de,en,ex])=>({de,en,type:"n.",ex,deck:"Familie & Beruf"})),
+
+// ---------- FARBEN & RICHTUNGEN ----------
+...[
+["blau","blue"],["braun","brown"],["gelb","yellow"],["grau","gray"],["grün","green"],["lila","purple"],
+["orange","orange"],["rosa","pink"],["rot","red"],["schwarz","black"],["weiß","white"]
+].map(([de,en])=>({de,en,type:"adj.",ex:"",deck:"Farben, Länder & Schule"})),
+...[
+["der Norden","north"],["der Süden","south"],["der Osten","east"],["der Westen","west"]
+].map(([de,en])=>({de,en,type:"n.",ex:"",deck:"Farben, Länder & Schule"})),
+...[
+["Deutschland","Germany"],["der/die Deutsche","German person"],["deutsch","German (adj.)"],["auf Deutsch","in German"],
+["Österreich","Austria"],["der Österreicher / die Österreicherin","Austrian person"],["österreichisch","Austrian (adj.)"],
+["die Schweiz","Switzerland"],["der Schweizer / die Schweizerin","Swiss person"],["schweizerisch","Swiss (adj.)"],
+["Luxemburg","Luxembourg"],["der Luxemburger / die Luxemburgerin","Luxembourger"],["luxemburgisch","Luxembourgish (adj.)"],
+["Europa","Europe"],["der Europäer / die Europäerin","European person"],["europäisch","European (adj.)"]
+].map(([de,en])=>({de,en,type:"n./adj.",ex:"",deck:"Farben, Länder & Schule"})),
+...[
+["das Abitur","high-school diploma","Sie macht nächstes Jahr Abitur."],
+["der Direktor","principal, director","Der Direktor ist heute nicht da."],
+["die Hausaufgabe","homework","Ich muss noch Hausaufgaben machen."],
+["die Klasse","class, grade","Meine Tochter ist in der 5. Klasse."],
+["die Klassenfahrt","class trip","Wir machen eine Klassenfahrt nach Berlin."],
+["das Sekretariat","school office","Das Formular bekommst du im Sekretariat."],
+["der Stundenplan","timetable","Hier ist mein neuer Stundenplan."],
+["Biologie","biology",""],["Chemie","chemistry",""],["Englisch","English",""],["Französisch","French",""],
+["Geografie","geography",""],["Geschichte","history",""],["Kunst(erziehung)","art",""],["Latein","Latin",""],
+["Mathematik","math",""],["Physik","physics",""],["Religion","religion",""],["Sozialkunde","social studies",""],
+["Sport","PE, sports",""]
+].map(([de,en,ex])=>({de,en,type:"n.",ex,deck:"Farben, Länder & Schule"})),
+
+// ---------- PRÜFUNGSWÖRTER (instruction language) ----------
+...[
+["der Antwortbogen","answer sheet","Schreiben Sie Ihre Antworten auf den Antwortbogen."],
+["die Aufgabe","task, exercise","Lösen Sie Aufgabe 3."],
+["das Beispiel","example","Hier ist ein Beispiel."],
+["die Durchsage","announcement","Sie hören eine Durchsage."],
+["die Lösung","solution, answer","Schreiben Sie die Lösung."],
+["markieren","to mark","Markieren Sie die richtige Antwort."],
+["der Prüfer / die Prüferin","examiner","Der Prüfer stellt Fragen."],
+["die Prüfung","exam","Die Prüfung dauert zwei Stunden."],
+["der Punkt","point","Sie bekommen einen Punkt."],
+["der Teil","part","Die Prüfung hat vier Teile."],
+["der Test","test","Wir schreiben morgen einen Test."],
+["der Text","text","Lesen Sie den Text."],
+["das Wörterbuch","dictionary","Ein Wörterbuch ist hier nicht erlaubt."]
+].map(([de,en,ex])=>({de,en,type:"n./v.",ex,deck:"Prüfungswörter"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — A
+   ====================================================== */
+...[
+["hat angeboten / anbieten","to offer","Er hat mir eine Stelle angeboten."],
+["das Angebot","offer, special","Heute sind Bananen im Angebot."],
+["ander-","other, different","Ich möchte den anderen."],
+["ändern (sich)","to change","Wie kann ich mein Passwort ändern?"],
+["anders","differently","Oliver ist anders als seine Freunde."],
+["anfangen","to begin, start","Der Unterricht fängt gleich an."],
+["der Anfang","beginning","Wir machen Anfang Juli Urlaub."],
+["die Angst","fear","Ich habe Angst vor großen Hunden."],
+["ankommen","to arrive","Wann kommt dieser Zug in Hamburg an?"],
+["die Ankunft","arrival","Auf dem Fahrplan steht die Ankunft."],
+["anmachen","to switch on","Mach bitte das Licht an!"],
+["sich anmelden","to register","Wo kann ich mich anmelden?"],
+["die Anmeldung","registration","Wo bekomme ich das Formular für die Anmeldung?"],
+["der Anrufbeantworter","answering machine","Sprechen Sie bitte auf den Anrufbeantworter."],
+["anrufen","to call (phone)","Kann ich Sie heute Abend anrufen?"],
+["der Anruf","phone call","Eva bekommt viele Anrufe."],
+["der Anschluss","connection (transport)","In Mannheim haben Sie Anschluss nach Saarbrücken."],
+["ansehen","to look at, watch","Darf ich eure Urlaubsfotos ansehen?"],
+["antworten","to answer","Er antwortet nicht."],
+["die Antwort","answer","Er gibt leider keine Antwort."],
+["die Anzeige","ad, notice","Ich habe Ihre Anzeige in der Zeitung gelesen."],
+["der Anzug","suit","Mein Mann muss sich einen neuen Anzug kaufen."],
+["der Apfel","apple","Ein Kilo Äpfel, bitte."],
+["die Apotheke","pharmacy","Das Medikament bekommen Sie in der Apotheke."],
+["ab","from, starting","Ab morgen muss ich wieder arbeiten."],
+["aber","but","Heute kann ich nicht, aber morgen habe ich Zeit."],
+["abgeben","to hand in, drop off","Ich muss meinen Schlüssel abgeben."],
+["abholen","to pick up","Wann kann ich die Sachen bei dir abholen?"],
+["abschließen","to lock; to complete","Hast du die Tür abgeschlossen?"],
+["Achtung","attention, caution","Achtung! Der Verkehr ist hier gefährlich."],
+["die Adresse","address","Können Sie mir Ihre Adresse geben?"],
+["die Ahnung","idea, clue","Ich habe keine Ahnung."],
+["aktiv","active","Peter ist sehr aktiv und macht viel Sport."],
+["aktuell","current","Das ist das aktuelle Kinoprogramm."],
+["all-","all","Hast du alles?"],
+["allein","alone","Er kommt allein."],
+["als","than; as; when","Sie arbeitet als Krankenschwester."],
+["also","so, well","Er hat Zeit, also kann er uns helfen."],
+["alt","old","Wie alt sind Sie?"],
+["das Alter","age","Alter: 18 Jahre."],
+["die Ampel","traffic light","Du kannst fahren, die Ampel ist grün."],
+["an","at, on","Wir treffen uns am Bahnhof."],
+["anbieten","to offer","Darf ich Ihnen ein Stück Kuchen anbieten?"],
+["der Apparat","apparatus, device","Ich habe einen neuen Fotoapparat."],
+["arbeiten","to work","Wo arbeiten Sie?"],
+["die Arbeit","work, job","Mein Bruder sucht Arbeit."],
+["arbeitslos","unemployed","Seit wann ist er schon arbeitslos?"],
+["sich ärgern","to be annoyed","Ich ärgere mich, weil das Wetter schlecht ist."],
+["arm","poor","Sie haben nicht viel Geld, sie sind arm."],
+["der Arm","arm (body)","Mein Arm tut weh."],
+["der Artikel","article; grammatical article","Ich habe einen interessanten Artikel gelesen."],
+["auch","also, too","Ich bin auch Spanier."],
+["auf","on, onto","Das Wörterbuch liegt auf dem Tisch."],
+["auf jeden/keinen Fall","in any case / no way","Ich sehe den Film auf keinen Fall."],
+["aufhören","to stop, end","Wann hört ihr mit der Arbeit auf?"],
+["aufmachen","to open","Kannst du bitte die Tür aufmachen?"],
+["aufpassen","to pay attention, watch out","Pass auf, der Teller fällt gleich!"],
+["aufräumen","to tidy up","Die Kinder müssen ihr Zimmer aufräumen."],
+["aufregend","exciting","Die letzte Woche war sehr aufregend."],
+["aufstehen","to get up","Ich stehe jeden Morgen um sieben Uhr auf."],
+["der Aufzug","elevator","Der Aufzug ist leider kaputt."],
+["das Auge","eye","Er hat blaue Augen."],
+["aus","from, out of","Michele kommt aus Brasilien."],
+["die Ausbildung","training, apprenticeship","Ich möchte eine Ausbildung machen."],
+["der Ausflug","excursion, trip","Morgen machen wir einen Ausflug."],
+["ausfüllen","to fill out","Füllen Sie bitte dieses Formular aus!"],
+["der Ausgang","exit","Wo ist der Ausgang?"],
+["ausgeben","to spend (money)","Ich möchte nicht so viel Geld ausgeben."],
+["ausgehen","to go out","Gehen wir am Freitag zusammen aus?"],
+["die Auskunft","information","Können Sie mir bitte eine Auskunft geben?"],
+["das Ausland","abroad","Fahren Sie ins Ausland?"],
+["ausmachen","to turn off","Mach bitte das Licht aus!"],
+["auspacken","to unpack","Packst du bitte den Koffer aus?"],
+["sich ausruhen","to rest","Ruh dich erst mal aus!"],
+["aussehen","to look (appear)","Wie sieht er aus?"],
+["außer","except","Außer Lisa möchte niemand den Film sehen."],
+["außerdem","besides, in addition","Möchten Sie außerdem noch etwas?"],
+["außerhalb","outside of","Die Wohnung liegt etwas außerhalb."],
+["aussprechen","to pronounce","Wie spricht man das Wort aus?"],
+["aussteigen","to get off/out","Wo müssen wir aussteigen?"],
+["die Ausstellung","exhibition","Gehen wir in die Ausstellung?"],
+["austragen","to deliver (e.g. papers)","Er trägt jeden Morgen die Zeitung aus."],
+["der Ausweis","ID card","Darf ich bitte Ihren Ausweis sehen?"],
+["das Auto","car","Er fährt mit dem Auto."],
+["die Autobahn","highway","Das Dorf liegt direkt an der Autobahn."],
+["der Automat","vending/ticket machine","Fahrkarten gibt es nur am Automaten."],
+["automatisch","automatic","Die Türen schließen automatisch!"]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: A"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — B
+   ====================================================== */
+...[
+["das Baby","baby","Wir haben ein Baby. Es ist sechs Wochen alt."],
+["backen","to bake","Wenn du kommst, backe ich einen Kuchen."],
+["die Bäckerei","bakery","Ich geh mal schnell zur Bäckerei."],
+["das Bad","bathroom; bath","Im Winter nehme ich gern ein warmes Bad."],
+["baden","to bathe, swim","In diesem See darf man nicht baden."],
+["die Bahn","train, railway","Wir fahren lieber mit der Bahn als mit dem Bus."],
+["der Bahnhof","train station","Komme ich hier zum Bahnhof?"],
+["der Bahnsteig","platform","Auf Hauptbahnhöfen gibt es viele Bahnsteige."],
+["bald","soon","Ich komme bald."],
+["der Balkon","balcony","Die Wohnung hat auch einen kleinen Balkon."],
+["der Ball","ball","Meine Kinder spielen gern Ball."],
+["die Banane","banana","Drei Bananen, bitte!"],
+["die Band","band (music)","Anton spielt in einer Band."],
+["die Bank (-en)","bank (finance)","Bei welcher Bank haben Sie Ihr Konto?"],
+["die Bank (¨-e)","bench","Wir setzen uns auf diese Bank."],
+["bar","in cash","Muss ich bar zahlen oder geht's auch mit Karte?"],
+["der Basketball","basketball","Yannick spielt lieber Basketball als Fußball."],
+["basteln","to do crafts","Die Kinder haben etwas gebastelt."],
+["der Bauch","stomach, belly","Seit gestern tut mir der Bauch weh."],
+["bauen","to build","Unsere Nachbarn bauen ein neues Haus."],
+["der Baum","tree","Der Baum ist über hundert Jahre alt."],
+["die Baustelle","construction site","Vor unserem Haus ist eine große Baustelle."],
+["beantworten","to answer (a question)","Können Sie meine Frage bitte beantworten?"],
+["sich bedanken","to say thank you","Ich möchte mich für Ihre Hilfe bedanken."],
+["bedeuten","to mean","Was bedeutet das Wort?"],
+["sich beeilen","to hurry","Kannst du dich bitte beeilen?"],
+["beenden","to finish, end","Du musst deine Ausbildung beenden."],
+["beginnen","to begin","Das Spiel beginnt um 15.30 Uhr."],
+["begründen","to give a reason","Bitte begründen Sie Ihre Meinung."],
+["bei","at, near, with","Ich wohne bei meinen Eltern."],
+["beide","both","Wir kommen beide."],
+["das Bein","leg","Mein rechtes Bein tut weh."],
+["bekannt","well-known","Picasso ist sehr bekannt."],
+["der/die Bekannte","acquaintance","Ein Bekannter von mir heißt Klaus."],
+["bekommen","to receive, get","Haben Sie meinen Brief bekommen?"],
+["beliebt","popular","Fußball ist bei vielen Menschen beliebt."],
+["benutzen","to use","Die Aufzüge bitte nicht benutzen!"],
+["bequem","comfortable","Das Sofa ist sehr bequem."],
+["beraten","to advise","Unsere Sekretärin berät Sie gern."],
+["der Berg","mountain","Wir fahren am Wochenende in die Berge."],
+["berichten","to report","Alle Zeitungen berichten von dem Unfall."],
+["der Beruf","profession","Was bist du von Beruf?"],
+["berühmt","famous","Thomas Müller ist ein berühmter Fußballspieler."],
+["der Bescheid","news, word, info","Kannst du mir bis morgen Bescheid geben?"],
+["beschreiben","to describe","Kannst du mir den Weg beschreiben?"],
+["sich beschweren","to complain","Wo können wir uns beschweren?"],
+["besetzt","occupied, taken","Ist dieser Platz frei? – Nein, er ist besetzt."],
+["besichtigen","to visit, tour (a sight)","Ich möchte gern das Schloss besichtigen."],
+["besonders","especially","Dieses Angebot ist besonders günstig."],
+["bestätigen","to confirm","Ich kann bestätigen, dass er hier war."],
+["bestehen","to pass (exam); to consist of","Ich habe die Prüfung bestanden!"],
+["bestellen","to order","Wir möchten bitte bestellen."],
+["der Besuch","visit","Wir bekommen am Wochenende Besuch."],
+["besuchen","to visit","Darf ich dich mal besuchen?"],
+["das Bett","bed","Sie ist krank und muss heute im Bett bleiben."],
+["sich bewerben","to apply (for a job)","Ich möchte mich um diese Stelle bewerben."],
+["die Bewerbung","application","Kannst du mir bei meiner Bewerbung helfen?"],
+["bewölkt","cloudy","Heute ist es bewölkt."],
+["bezahlen","to pay","Wo kann ich bezahlen?"],
+["die Bibliothek","library","Sie lernt jeden Tag in der Bibliothek."],
+["das Bier","beer","Noch ein Bier, bitte."],
+["das Bild","picture","Hast du ein Bild von deinem Sohn?"],
+["billig","cheap","Das ist aber billig!"],
+["die Birne","pear","Ein Kilo Birnen, bitte!"],
+["bis","until","Ich warte bis Freitag."],
+["bisschen","a little, a bit","Ich spreche ein bisschen Französisch."],
+["bitte","please","Eine Tasse Kaffee, bitte!"],
+["die Bitte","request","Ich habe noch eine Bitte."],
+["bitten","to ask, request","Darf ich Sie um etwas bitten?"],
+["bitter","bitter","Kaffee ohne Zucker schmeckt bitter."],
+["das Blatt","leaf; sheet (of paper)","Haben Sie ein Blatt Papier für mich?"],
+["bleiben","to stay, remain","Wir bleiben drei Tage in Berlin."],
+["der Bleistift","pencil","Hast du einen Bleistift?"],
+["blöd","silly, dumb","Ich finde es blöd, dass du gehen musst."],
+["der/das Blog","blog","Ich schreibe einen Blog über Mode."],
+["blond","blond","Lisa hat blonde Haare."],
+["die Blume","flower","Gefallen dir die Blumen?"],
+["die Bluse","blouse","Ich suche eine weiße Bluse."],
+["die Bohne","bean","Hans isst nicht gern Bohnen."],
+["böse","angry, mad","Sie ist richtig böse auf mich."],
+["braten","to fry, roast","Braten Sie das Fleisch in etwas Öl!"],
+["brauchen","to need","Ich brauche ein neues Auto."],
+["der Brief","letter","Haben Sie einen Brief für mich?"],
+["die Briefmarke","stamp","Bitte die Briefmarke nicht vergessen!"],
+["die Brille","glasses","Wo ist meine Brille?"],
+["bringen","to bring","Bringen Sie mir bitte noch einen Kaffee!"],
+["das Brot","bread","Haben Sie auch Weißbrot?"],
+["das Brötchen","bread roll","Möchtest du Brot oder Brötchen zum Frühstück?"],
+["die Brücke","bridge","Fahren Sie über die nächste Brücke."],
+["das Buch","book","Was kostet das Buch, bitte?"],
+["buchen","to book","Morgen buche ich unsere Urlaubsreise."],
+["der Buchstabe","letter (of the alphabet)","Diesen Buchstaben gibt es in meiner Sprache nicht."],
+["buchstabieren","to spell","Würden Sie bitte Ihren Namen buchstabieren?"],
+["bunt","colorful","Meine Wohnung ist sehr bunt."],
+["das Büro","office","Ich arbeite in einem Büro."],
+["der Bus","bus","Wann kommt der nächste Bus?"],
+["die Butter","butter","Möchtest du Butter aufs Brot?"]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: B"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — C
+   ====================================================== */
+...[
+["das Café","café","Ich möchte gern einen Kaffee trinken."],
+["die Cafeteria","cafeteria","Ich gehe jetzt in die Cafeteria."],
+["chatten","to chat (online)","Luis chattet gern mit seinen Freunden."],
+["der Chef / die Chefin","boss","Wir haben eine neue Chefin."],
+["der Club / Klub","club","Wo gibt es hier einen Club mit guter Musik?"],
+["der/das Comic","comic book","Mein Sohn liest immer nur Comics."],
+["der Computer","computer","Wann bekommst du deinen neuen Computer?"],
+["die Creme","cream, lotion","Ich suche eine Creme für die Hände."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: C"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — D
+   ====================================================== */
+...[
+["da","there; since (then)","Ist Herr Klein schon da?"],
+["dabei sein","to be present, included","Hast du einen Stift dabei?"],
+["dafür/dagegen sein","to be for/against (something)","Ich bin dafür."],
+["damals","back then","Damals hatte ich kein Geld."],
+["die Dame","lady","Sehr geehrte Damen und Herren,"],
+["daneben","next to it","Daneben ist die Bank."],
+["der Dank","thanks","Vielen Dank!"],
+["danke","thank you","Danke gleichfalls."],
+["danken","to thank","Ich danke Ihnen für die Einladung."],
+["dann","then","Ich muss noch zur Post, dann komme ich."],
+["dass","that (conjunction)","Ich finde es super, dass du mich besuchst."],
+["die Datei","file (computer)","Wo hast du die Datei gespeichert?"],
+["das Datum","date","Welches Datum haben wir heute?"],
+["dauern","to last, take (time)","Wie lange dauert die Pause?"],
+["denken","to think","Ich denke, du hast recht."],
+["denn","because, for","Ich kann nicht kommen, denn ich bin krank."],
+["deshalb","therefore","Ich bin krank. Deshalb komme ich nicht."],
+["deutlich","clearly","Sprechen Sie bitte deutlich!"],
+["dick","fat, thick","Ich bin zu dick."],
+["das Ding","thing","Was macht man mit diesem Ding?"],
+["direkt","direct(ly)","Gibt es keinen direkten Zug nach Hamburg?"],
+["die Disco / Disko","disco, club","Wir gehen heute Abend in die Disco."],
+["diskutieren","to discuss","Ich möchte das mit meinen Kollegen diskutieren."],
+["doch","yes (contradicting a negative); after all","Hast du keinen Hunger? – Doch."],
+["das Doppelzimmer","double room","Möchten Sie ein Doppelzimmer?"],
+["das Dorf","village","Meine Familie lebt in einem Dorf."],
+["dort","there","Dort ist unser Haus."],
+["draußen","outside","Wollen wir draußen sitzen?"],
+["dringend","urgent","Bitte kommen Sie schnell, es ist dringend."],
+["drinnen","inside","Hier drinnen ist es sehr warm."],
+["drüben","over there","Da drüben ist die Haltestelle."],
+["drücken","to push, press","Drücken Sie „Bestätigen“!"],
+["drucken","to print","Wähle einfach „Datei drucken“!"],
+["der Drucker","printer","Mein Drucker ist kaputt."],
+["dumm","stupid, silly","Ich finde den Film dumm."],
+["dunkel","dark","Um sechs Uhr ist es schon dunkel."],
+["dünn","thin","Das Buch ist sehr dünn."],
+["durch","through","Wir fahren mit dem Fahrrad durch den Wald."],
+["dürfen","to be allowed to","Sie dürfen hier nicht parken."],
+["der Durst","thirst","Ich habe großen Durst."],
+["die Dusche","shower","Unsere Wohnung hat nur eine Dusche."],
+["sich duschen","to shower","Ich bade nicht so gern, ich dusche lieber."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: D"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — E
+   ====================================================== */
+...[
+["die Ehefrau / der Ehemann / der Ehepartner","wife / husband / spouse","Das ist mein Ehemann/meine Ehefrau."],
+["das Ei","egg","Möchtest du ein Ei zum Frühstück?"],
+["eigen-","own","Nicht alle Kinder haben ein eigenes Zimmer."],
+["eigentlich","actually","Kennst du eigentlich Susanne?"],
+["eilig","in a hurry","Hast du es eilig?"],
+["einfach","simple, easy; one-way","Die Prüfung ist ganz einfach."],
+["der Eingang","entrance","Der Eingang ist um die Ecke."],
+["einig-","some","In diesem Text sind einige Fehler."],
+["einkaufen","to shop","Ich muss noch für morgen einkaufen."],
+["das Einkaufszentrum","shopping center","Kommst du morgen mit ins Einkaufszentrum?"],
+["einladen","to invite","Darf ich Sie zu einem Kaffee einladen?"],
+["die Einladung","invitation","Danke für die Einladung zu deinem Geburtstag!"],
+["einmal","once","Warst du schon einmal in Paris?"],
+["einpacken","to pack, wrap","Soll ich Ihnen das als Geschenk einpacken?"],
+["einsteigen","to get on/board","Schnell, steig ein, der Zug fährt gleich ab."],
+["sich eintragen","to register, sign in","Tragen Sie sich bitte in diese Liste ein!"],
+["der Eintritt","entry, admission","Der Eintritt kostet fünf Euro."],
+["einverstanden sein","to agree","Gut, ich bin einverstanden."],
+["einzel-","individual, single","Ein Einzelzimmer ist noch frei."],
+["einziehen","to move in","Wann können wir in die Wohnung einziehen?"],
+["das Eis","ice cream; ice","Möchtest du auch ein Eis?"],
+["die (E-)Mail","email","Ich schreibe Ihnen eine E-Mail."],
+["der Empfänger","recipient","Auf dem Brief steht dein Name, also bist du der Empfänger."],
+["empfehlen","to recommend","Welchen Wein können Sie mir empfehlen?"],
+["das Ende","end","Sie wohnt am Ende der Straße."],
+["enden","to end","Der Kurs endet in einer Woche."],
+["endlich","finally","Endlich bist du da!"],
+["eng","tight, narrow","Diese Hose ist zu eng."],
+["sich entschuldigen","to apologize","Ich möchte mich bei dir entschuldigen."],
+["die Entschuldigung","apology, excuse me","Oh, Entschuldigung!"],
+["das Erdgeschoss","ground floor","Ich wohne im Erdgeschoss."],
+["die Erfahrung","experience","Ich habe zehn Jahre Erfahrung in diesem Beruf."],
+["sich erinnern","to remember","Erinnerst du dich an José?"],
+["erkältet sein","to have a cold","Lisa ist erkältet."],
+["erklären","to explain","Kannst du mir das erklären?"],
+["erlauben","to allow","Ich habe es ihnen erlaubt."],
+["erlaubt sein","to be allowed","Parken ist hier nicht erlaubt."],
+["die Erlaubnis","permission","Haben Sie eine Arbeitserlaubnis?"],
+["die Ermäßigung","discount","Für Studenten gibt es eine Ermäßigung."],
+["erreichen","to reach","Bis 18 Uhr können Sie mich im Büro erreichen."],
+["erst","only, not until; just","Dina ist erst 16 Jahre alt."],
+["der/die Erwachsene","adult","Dieser Film ist nur für Erwachsene."],
+["erzählen","to tell (a story)","Erzählst du mir eine Geschichte?"],
+["essen","to eat","Was gibt es zu essen?"],
+["das Essen","food, meal","Das Essen in der Cafeteria ist ganz gut."],
+["etwas","something; a little","Ich muss dir etwas erzählen!"]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: E"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — F
+   ====================================================== */
+...[
+["das Fach","subject (school)","Welches Fach magst du in der Schule am liebsten?"],
+["(ab)fahren","to depart, drive","Ich fahre mit dem Auto zur Arbeit."],
+["die Abfahrt","departure","Wir haben noch zwanzig Minuten bis zur Abfahrt."],
+["die Fahrkarte","ticket (transport)","Hast du schon eine Fahrkarte?"],
+["der Fahrplan","timetable, schedule","Ist das der neue Fahrplan?"],
+["das (Fahr)Rad","bicycle","Wenn es nicht regnet, fahre ich mit dem Fahrrad."],
+["fallen","to fall","Pass auf, das Glas fällt gleich vom Tisch."],
+["falsch","wrong, incorrect","Die Lösung ist falsch."],
+["die Familie","family","Meine Familie lebt in Spanien."],
+["der Familienname","last name, surname","Mein Familienname ist González."],
+["der Fan","fan (supporter)","Er ist ein großer Fußballfan."],
+["fantastisch","fantastic","Dein neues Kleid sieht fantastisch aus!"],
+["die Farbe","color","Was ist deine Lieblingsfarbe?"],
+["fast","almost","Der Film ist fast zu Ende."],
+["faul","lazy","Heute sind wir faul."],
+["fehlen","to be missing, absent","Was fehlt Ihnen?"],
+["der Fehler","mistake","Diesen Fehler mache ich immer wieder."],
+["die Feier (Feierabend/Feiertag)","celebration (quitting time/holiday)","Wann hast du Feierabend?"],
+["feiern","to celebrate","Wir feiern heute meinen Geburtstag."],
+["das Fenster","window","Kannst du bitte das Fenster öffnen?"],
+["die Ferien","vacation, holidays","Bald haben wir Ferien."],
+["fernsehen","to watch TV","Lass uns heute Abend mal fernsehen."],
+["der Fernseher","television set","Der Fernseher ist kaputt."],
+["fertig sein","to be ready, finished","Das Essen ist gleich fertig."],
+["das Fest","celebration, party","Frohes Fest!"],
+["das Festival","festival","Am Wochenende ist ein Musik-Festival."],
+["fett","fatty, greasy","Die Wurst ist mir zu fett."],
+["das Fieber","fever","Sie hat hohes Fieber."],
+["der Film","movie","Ich möchte gern diesen Film sehen."],
+["finden","to find; to think (an opinion)","Ich finde ihn sehr nett."],
+["die Firma","company","Er arbeitet bei einer anderen Firma."],
+["der Fisch","fish","Fisch mag ich lieber als Fleisch."],
+["fit sein","to be fit","Tom geht jeden Tag ins Fitnessstudio."],
+["die Flasche","bottle","Eine Flasche Mineralwasser, bitte!"],
+["das Fleisch","meat","Fleisch mag ich nicht."],
+["fleißig","hard-working, diligent","Ibrahim ist sehr fleißig."],
+["(ab)fliegen","to fly (off, depart)","Ich fliege in den Ferien nach Spanien."],
+["der Flohmarkt","flea market","Ich gehe gern auf den Flohmarkt."],
+["der Flug","flight","Ich möchte einen Flug nach Kanada buchen."],
+["der Flughafen","airport","Kannst du mich zum Flughafen bringen?"],
+["das Flugzeug","airplane","Das Flugzeug startet in einer halben Stunde."],
+["der Fluss","river","Der Rhein ist ein großer Fluss."],
+["das Formular","form (document)","Sie müssen dieses Formular ausfüllen."],
+["der Fotoapparat","camera","Ich möchte mir einen Fotoapparat kaufen."],
+["fotografieren","to photograph","Ich fotografiere gern."],
+["das Foto","photo","Darf ich ein Foto machen?"],
+["die Frage","question","Ich habe eine Frage."],
+["fragen","to ask","Ich möchte Sie etwas fragen."],
+["die Frau","woman; Mrs.","Das ist Frau Becker."],
+["frei","free; available","Ist dieser Platz noch frei?"],
+["freiwillig","voluntary","Manchmal bleibe ich freiwillig länger im Büro."],
+["die Freizeit","free time, leisure","In meiner Freizeit spiele ich oft Fußball."],
+["fremd","foreign, strange","Ich reise gern in fremde Länder."],
+["sich freuen","to be happy, look forward to","Ich freue mich sehr über das Geschenk."],
+["der Freund / die Freundin","friend; boyfriend/girlfriend","Das ist ein Freund von mir."],
+["freundlich","friendly","Er ist immer sehr freundlich zu mir."],
+["frisch","fresh","Das Brot ist noch ganz frisch."],
+["froh","glad, happy","Ich bin froh, dass du kommen kannst."],
+["früh","early","Ich muss morgen sehr früh aufstehen."],
+["früher","earlier, in the past","Früher habe ich in Berlin gewohnt."],
+["das Frühstück","breakfast","Möchtest du ein Ei zum Frühstück?"],
+["frühstücken","to have breakfast","Ich frühstücke immer um 9:00 Uhr."],
+["sich fühlen","to feel","Wie fühlen Sie sich?"],
+["der Führerschein","driver's license","Hast du den Führerschein?"],
+["die Führung","guided tour","Die nächste Führung beginnt um 15 Uhr."],
+["die Fundsachen","lost and found","Sie können bei den Fundsachen schauen."],
+["für","for","Das Paket ist für Sie."],
+["furchtbar","terrible, awful","Er hat furchtbare Schmerzen."],
+["der Fuß","foot","Der linke Fuß tut mir weh."],
+["der Fußball","soccer","Spielt ihr gern Fußball?"]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: F"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — G
+   ====================================================== */
+...[
+["die Gabel","fork","Kann ich bitte eine Gabel haben?"],
+["ganz","whole, entirely, quite","Morgen haben wir den ganzen Tag Schule."],
+["die Garage","garage","Hier ist eine Garage für dein Auto."],
+["der Garten","garden, yard","Wir haben leider keinen Garten."],
+["der Gast","guest","Heute Abend haben wir Gäste."],
+["geben","to give; es gibt = there is/are","Es gibt keine Karten mehr für das Konzert."],
+["geboren","born","Wann und wo sind Sie geboren?"],
+["Geburts(jahr/ort/tag)","birth(year/place/day)","Herzlichen Glückwunsch zum Geburtstag!"],
+["geehrt-","dear, honored (in letters)","Sehr geehrte Damen und Herren,"],
+["gefährlich","dangerous","Das ist gefährlich."],
+["gefallen","to like, please","Das Bild gefällt mir."],
+["gegen","against; around (time)","Ich bin gegen diesen Vorschlag."],
+["das Gegenteil","opposite","Das Gegenteil von „klein“ ist „groß“."],
+["gegenüber","across from, opposite","Die Post ist gegenüber vom Bahnhof."],
+["das Gehalt","salary","Sie ist mit ihrem Gehalt zufrieden."],
+["gehen","to go; Wie geht's?","Ich muss jetzt leider gehen."],
+["gehören","to belong to","Gehört der Stift dir?"],
+["das Geld","money","Hast du noch Geld?"],
+["die Geldbörse","wallet, purse","Sie hat ihre Geldbörse verloren."],
+["das Gemüse","vegetables","Tomaten sind mein Lieblingsgemüse."],
+["genau","exactly","Das weiß ich genau."],
+["genug","enough","Ich verdiene nicht genug."],
+["das Gepäck","luggage","Wollen Sie Ihr Gepäck mitnehmen?"],
+["gerade","right now; straight","Was machst du gerade?"],
+["geradeaus","straight ahead","Gehen Sie immer geradeaus!"],
+["das Gerät","device, appliance","Elektrogeräte finden Sie im dritten Stock."],
+["das Gericht","dish (food)","Mein Lieblingsgericht ist Pizza."],
+["gern, lieber, am liebsten","gladly, prefer, like most","Ich helfe Ihnen gern."],
+["das Geschäft","store, shop","Die Geschäfte schließen um 18.30 Uhr."],
+["das Geschenk","gift","Danke für das schöne Geschenk."],
+["die Geschichte","story; history","Erzählst du mir eine Geschichte?"],
+["das Geschirr","dishes","Stellst du bitte das Geschirr in den Schrank?"],
+["das Gesicht","face","Wasch dir bitte das Gesicht."],
+["das Gespräch","conversation","Das Gespräch mit Frau Kunz ist um 14 Uhr."],
+["gestern","yesterday","Gestern wollte ich dich anrufen."],
+["gesund","healthy","Jetzt bin ich wieder gesund."],
+["die Gesundheit","health","Gesundheit!"],
+["das Getränk","drink, beverage","Mein Lieblingsgetränk ist Tomatensaft."],
+["gewinnen","to win","Unsere Mannschaft hat gewonnen."],
+["das Gewitter","thunderstorm","Ich glaube, es gibt heute ein Gewitter."],
+["die Gitarre","guitar","Er kann gut Gitarre spielen."],
+["das Glas","glass","Bitte noch ein Glas Apfelsaft!"],
+["glauben","to believe, think","Ich glaube, er kommt gleich."],
+["gleich","same; right away","Ich komme gleich."],
+["das Gleis","track, platform (train)","Der ICE nach Berlin hält an Gleis 12."],
+["das Glück","luck","Viel Glück!"],
+["glücklich","happy","Ein glückliches neues Jahr!"],
+["der Glückwunsch","congratulations","Herzlichen Glückwunsch zum Geburtstag!"],
+["gratulieren","to congratulate","Ich gratuliere dir!"],
+["grillen","to grill, barbecue","Heute grillen wir im Garten."],
+["die Grippe","flu","Ich habe eine Grippe und kann nicht kommen."],
+["groß","big, tall","Frankfurt ist eine große Stadt."],
+["die Größe","size","Haben Sie das T-Shirt auch in Größe M?"],
+["die Gruppe","group","Die erste Gruppe beginnt um 16 Uhr."],
+["der Gruß","greeting","Mit freundlichen Grüßen"],
+["gültig sein","to be valid","Der Pass ist nicht mehr gültig."],
+["günstig","cheap, good value","Ich suche ein günstiges Sofa."],
+["gut, besser, am besten","good, better, best","Das finde ich gut."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: G"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — H
+   ====================================================== */
+...[
+["die Halle","hall","Wir treffen uns in Halle B."],
+["hallo","hello","Hallo Inge! Wie geht's?"],
+["der Hals","neck, throat","Mir tut der Hals weh."],
+["halten","to hold; to stop (vehicle)","Dieser Zug hält nicht in Rüdesheim."],
+["die Haltestelle","(bus/tram) stop","An der nächsten Haltestelle müssen Sie aussteigen."],
+["der Hamburger","hamburger","Einen Hamburger ohne Salat, bitte."],
+["die Hand","hand","Wasch dir bitte die Hände vor dem Essen."],
+["das Handtuch","towel","Gibst du mir bitte ein frisches Handtuch?"],
+["das Handy","cell phone","Kannst du mir deine Handynummer geben?"],
+["hängen","to hang","Im Museum hängen moderne Bilder."],
+["hart","hard","Ich finde das Bett zu hart."],
+["hässlich","ugly","Ich finde das Kleid hässlich."],
+["die Hauptstadt","capital city","Berlin ist die Hauptstadt von Deutschland."],
+["das Haus","house","In welchem Haus wohnst du?"],
+["der Haushalt","household","Wer macht bei euch den Haushalt?"],
+["das Heft","notebook","Hast du dein Heft dabei?"],
+["die Heimat","home, homeland","Mein Heimatland ist Italien."],
+["heiraten","to marry","Meine Schwester heiratet nächsten Monat."],
+["heiß","hot","Vorsicht, der Tee ist heiß!"],
+["heißen","to be called, named","Ich heiße Charlotte Meier."],
+["die Heizung","heating","Ist die Heizung kaputt?"],
+["helfen","to help","Würden Sie mir bitte helfen?"],
+["hell","bright, light","Mein Zimmer ist sehr hell."],
+["das Hemd","shirt","Nick trägt heute ein neues Hemd."],
+["her","here, towards (speaker)","Woher kommen Sie?"],
+["heraus/raus","out","Kannst du bitte den Müll rausbringen?"],
+["herein/rein","in, come in","Herein! Die Tür ist offen."],
+["der Herd","stove","In der neuen Küche fehlt noch der Herd."],
+["der Herr","Mr., gentleman","Guten Tag, Herr Sommer!"],
+["herstellen","to manufacture, produce","In unserer Firma stellen wir Möbel her."],
+["herunterladen","to download","Er lädt die Musik aus dem Internet herunter."],
+["herzlich","warm, cordial","Herzlichen Glückwunsch!"],
+["heute","today","Heute ist ein schöner Tag."],
+["hier","here","Hier wohne ich."],
+["die Hilfe","help","Hilfe! Bitte helfen Sie mir!"],
+["der Himmel","sky","Der Himmel ist blau."],
+["hin","there (away from speaker)","Wo gehst du hin?"],
+["hinten","in the back","Bitte hinten aussteigen!"],
+["hinter","behind","Hinter dem Haus haben wir einen Garten."],
+["das Hobby","hobby","Meine Hobbys sind Joggen und Schwimmen."],
+["hoch","high, tall","Der Mount Everest ist sehr hoch."],
+["die Hochzeit","wedding","Zu seiner Hochzeit kommen viele Gäste."],
+["hoffen","to hope","Ich hoffe, dass es dir gut geht."],
+["hoffentlich","hopefully","Hoffentlich hat unser Zug keine Verspätung."],
+["holen","to get, fetch","Soll ich uns etwas zu trinken holen?"],
+["die Homepage","homepage, website","Kennst du eine Homepage mit Deutschübungen?"],
+["hören","to hear, listen","Hör mal! Was ist das?"],
+["die Hose","pants, trousers","Kann ich die Hose waschen?"],
+["das Hotel","hotel","Im Urlaub sind wir in einem Hotel am Meer."],
+["der Hund","dog","Magst du Hunde?"],
+["der Hunger","hunger","Ich habe Hunger!"],
+["husten","to cough","Sie hustet seit zwei Tagen."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: H"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — I / J
+   ====================================================== */
+...[
+["die Idee","idea","Hast du eine gute Idee?"],
+["immer","always","Frau Bast kommt immer zu spät."],
+["in","in, into","Ich wohne in Wiesbaden."],
+["die Information","information","Wenn Sie Fragen haben, gehen Sie zur Information."],
+["sich informieren (über)","to find out about","Ich möchte mich über das Land informieren."],
+["die Insel","island","Rügen ist die größte deutsche Insel."],
+["das Instrument","instrument","Spielen Sie auch ein Instrument?"],
+["intelligent","intelligent","Einstein war sehr intelligent."],
+["das Interesse","interest","Ich habe viele Interessen."],
+["sich interessieren (für)","to be interested in","Ich interessiere mich für Fußball."],
+["interessant","interesting","Ich lese gerade ein interessantes Buch."],
+["international","international","Unser Deutschkurs ist international."],
+["das Internet","internet","Das findest du im Internet."],
+["das Interview","interview","Im Radio kommt ein Interview mit deinem Lieblingssänger."],
+["ja","yes","Sind Sie Herr Watanabe? – Ja."],
+["die Jacke","jacket","Zieh dir eine Jacke an. Es ist kalt."],
+["die Jeans","jeans","Ich mag Jeans lieber als Röcke."],
+["jeder, e, s","every, each","Jedes Kind bekommt einen Ball."],
+["jemand","someone","Hat jemand meinen Stift?"],
+["jetzt","now","Jetzt machen wir eine Pause."],
+["der Job","job","Jenny hat einen neuen Job bei der Post."],
+["joggen","to jog","Ich jogge gern im Park."],
+["die Jugendherberge","youth hostel","Wir übernachten in einer Jugendherberge."],
+["der/die Jugendliche","teenager, young person","Viele Jugendliche hören den ganzen Tag Musik."],
+["jung","young","Bei uns im Haus wohnen viele junge Leute."],
+["der Junge","boy","In der Klasse sind 13 Jungen."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: I & J"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — K
+   ====================================================== */
+...[
+["der Kaffee","coffee","Zum Frühstück trinke ich immer Kaffee."],
+["der Kalender","calendar","Ich schreibe alle Termine in meinen Kalender."],
+["kalt","cold","Heute ist es sehr kalt."],
+["die Kamera","camera","Hannes hat eine neue Kamera."],
+["kaputt","broken","Unsere Waschmaschine ist kaputt."],
+["die Karte","card; ticket; map","Wollen wir Karten spielen?"],
+["die Kartoffel","potato","Für Pommes frites braucht man Kartoffeln."],
+["der Käse","cheese","Isst du lieber Käse oder Wurst?"],
+["die Kasse","checkout, register","Zahlen Sie bitte an der Kasse."],
+["die Katze","cat","Meine Tochter wünscht sich eine Katze."],
+["kaufen","to buy","Tim kauft sich ein neues Auto."],
+["das Kaufhaus","department store","Meine Pullover kaufe ich im Kaufhaus."],
+["kein, e","no, not any","Ich habe heute leider keine Zeit."],
+["der Keller","cellar, basement","Die Waschmaschinen sind im Keller."],
+["kennen","to know (be familiar with)","Kennen Sie diese Frau?"],
+["kennenlernen","to get to know, meet","Wo habt ihr euch kennengelernt?"],
+["die Kenntnisse","knowledge, skills","Deine Deutschkenntnisse sind sehr gut!"],
+["die Kette","necklace, chain","Meine Mutter bekommt eine schöne Kette."],
+["das Kind","child","Wie viele Kinder haben Sie?"],
+["der Kindergarten","kindergarten","Die kleine Laura geht schon in den Kindergarten."],
+["das Kino","cinema","Gehen wir heute Abend zusammen ins Kino?"],
+["der Kiosk","kiosk, newsstand","Zeitungen kannst du am Kiosk kaufen."],
+["die Kirche","church","Diese Kirche ist fast 800 Jahre alt."],
+["klappen","to work out, go well","Es hat alles super geklappt."],
+["klar","clear; of course","Kommst du mit? – Klar!"],
+["das Klavier","piano","Jakob kann sehr gut Klavier spielen."],
+["das Kleid","dress","Julia möchte ein rotes Kleid kaufen."],
+["die Kleidung","clothing","Wo finde ich Kleidung?"],
+["klein","small","Unsere Wohnung ist sehr klein."],
+["klug","smart, clever","Lisa ist sehr klug."],
+["kochen","to cook","Herr Georgi kann gut kochen."],
+["der Koffer","suitcase","Hast du den Koffer schon gepackt?"],
+["der Kollege / die Kollegin","colleague","Wie heißt die neue Kollegin?"],
+["komisch","funny, strange","Der Film war sehr komisch."],
+["kommen","to come","Woher kommen Sie?"],
+["können","can, to be able to","Können Sie mir helfen?"],
+["der Kontakt","contact","Ich habe wenig Kontakt zu meinen Kollegen."],
+["das Konto","(bank) account","Wir überweisen das Geld auf Ihr Konto."],
+["kontrollieren","to check, control","Können Sie das Öl kontrollieren?"],
+["das Konzert","concert","Für das Konzert gibt es noch Karten."],
+["der Kopf","head","Mein Kopf tut weh!"],
+["der Körper","body","Ich muss etwas für meinen Körper tun."],
+["die Kosmetik","cosmetics","Kosmetik können Sie im Erdgeschoss kaufen."],
+["kosten","to cost","Wie viel kostet das Buch?"],
+["kostenlos","free of charge","Diese Zeitschrift ist kostenlos."],
+["krank","sick","Ich bin krank und liege im Bett."],
+["das Krankenhaus","hospital","Er muss ins Krankenhaus."],
+["die Krankenkasse","health insurance","Bei welcher Krankenkasse sind Sie?"],
+["die Krankheit","illness","Welche Krankheit hat Herr Brandner?"],
+["der Kredit","credit, loan","Ich brauche einen Kredit von der Bank."],
+["die Kreuzung","intersection","Fahren Sie an der nächsten Kreuzung rechts."],
+["kriegen","to get, receive","Was kriegen Sie?"],
+["der Krimi","crime story, thriller","Miriam liest gern spannende Krimis."],
+["die Küche","kitchen","Ich suche eine neue Wohnung mit Küche und Bad."],
+["der Kuchen","cake","Schokoladenkuchen schmeckt mir am besten."],
+["kühl","cool","Es ist kühl draußen."],
+["der Kühlschrank","refrigerator","Haben wir noch Milch? – Ja, im Kühlschrank."],
+["die Kultur","culture","Jana interessiert sich sehr für Kultur."],
+["sich kümmern","to take care of","Ich muss mich um das Essen kümmern."],
+["der Kunde / die Kundin","customer","Ich habe eine Kundin."],
+["kündigen","to quit, give notice","Ich habe heute gekündigt."],
+["die Kunst","art","Kunst war mein Lieblingsfach."],
+["der Kurs","course","Der Deutschkurs dauert zwei Monate."],
+["kurz","short","Ricardo hat kurze Haare."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: K"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — L
+   ====================================================== */
+...[
+["lang","long","Die Hose ist zu lang."],
+["lange","for a long time, how long","Wie lange fährt der Zug?"],
+["langsam","slow(ly)","Könnten Sie bitte etwas langsamer sprechen?"],
+["langweilig","boring","Mir ist langweilig."],
+["der Laptop","laptop","Ich brauche einen neuen Laptop."],
+["lassen","to leave, let","Kann ich mein Auto hier stehen lassen?"],
+["laufen","to run, walk; to be playing (a movie)","Wann läuft der Film?"],
+["laut","loud","Nicht so laut! Das Baby schläft."],
+["leben","to live","Sie lebt bei ihrer Schwester."],
+["das Leben","life","Hier in London ist das Leben teuer."],
+["die Lebensmittel","groceries, food","Lebensmittel bekommen Sie im Supermarkt."],
+["leer","empty","Die Kanne ist fast leer."],
+["legen","to lay, put down (flat)","Legen Sie das Buch auf den Tisch."],
+["leicht","light; easy","Die Aufgabe ist nicht leicht."],
+["leider","unfortunately","Leider kann ich nicht kommen."],
+["leidtun","to be sorry","Es tut mir leid."],
+["leihen","to lend, borrow","Kannst du mir fünf Euro leihen?"],
+["leise","quiet","Seid leise. Die anderen schlafen schon."],
+["lernen","to learn, study","Wie lange lernen Sie schon Deutsch?"],
+["lesen","to read","In der Schule lesen wir ein Buch."],
+["letzt-","last","Morgen ist der letzte Kurstag."],
+["die Leute","people","Auf der Party sind viele Leute."],
+["das Licht","light","Mach bitte das Licht an!"],
+["lieb-","dear; rather (lieber)","Ich fahre lieber mit dem Zug."],
+["lieben","to love","Ich liebe dich!"],
+["Lieblings-","favorite","Meine Lieblingsfarbe ist Blau."],
+["das Lied","song","Zum Geburtstag singen wir dir ein Lied."],
+["liefern","to deliver","Wir liefern Ihnen den Schrank nach Hause."],
+["liegen","to lie, be located","Frankfurt liegt am Main."],
+["der Link","link","Ich schicke dir einen Link."],
+["links","left","Gehen Sie die nächste Straße links."],
+["der Löffel","spoon","Bitte bringen Sie mir einen Löffel."],
+["das Lokal","restaurant, pub","Gibt es hier ein gutes Lokal?"],
+["die Lüge","lie","Das stimmt nicht! Das ist eine Lüge!"],
+["lügen","to lie","Du sollst nicht lügen."],
+["die Lust","desire, mood for (something)","Ich habe keine Lust."],
+["lustig","funny","Was ist so lustig?"]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: L"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — M
+   ====================================================== */
+...[
+["machen","to do, make","Was machst du heute Abend?"],
+["das Mädchen","girl","Junge oder Mädchen?"],
+["der Magen","stomach","Mein Magen tut weh."],
+["die Mailbox","voicemail","Ich habe dir auf die Mailbox gesprochen."],
+["mal / das Mal","time, occasion","Das erste Mal war ich vor fünf Jahren in England."],
+["malen","to paint","Mein Sohn kann gut malen."],
+["man","one, you (general)","Wie schreibt man das?"],
+["manch-","some","Manche Nachbarn sind unfreundlich."],
+["manchmal","sometimes","Manchmal essen wir im Restaurant."],
+["der Mann","man, husband","Mein Mann ist Polizist."],
+["männlich","male","Bitte wählen Sie: weiblich oder männlich."],
+["die Mannschaft","team","Meine Lieblingsmannschaft hat verloren."],
+["der Mantel","coat","Es ist kalt. Zieh deinen Mantel an!"],
+["der Markt","market","Samstags ist hier Markt."],
+["die Maschine","machine","Die Waschmaschine funktioniert sehr gut."],
+["das Medikament","medicine","Nehmen Sie dieses Medikament dreimal pro Tag!"],
+["das Meer","sea","Wir machen Urlaub am Meer."],
+["mehr","more","Ich möchte mehr Taschengeld."],
+["meinen","to mean, think","Wie meinst du das?"],
+["die Meinung","opinion","Was ist deine Meinung dazu?"],
+["meist-","most","Die meisten Nachbarn kenne ich noch nicht."],
+["meistens","mostly, usually","Meistens trinke ich zum Frühstück nur einen Kaffee."],
+["die Menge","amount, lot","Wir haben noch eine Menge Zeit."],
+["der Mensch","person, human","Die Menschen sind hier ein bisschen anders."],
+["merken","to notice; to remember","Ich kann mir keine Zahlen merken."],
+["die Messe","trade fair","Kommst du mit zur Buchmesse?"],
+["das Messer","knife","Das Messer schneidet nicht gut."],
+["die Miete","rent","Wie viel Miete bezahlst du?"],
+["mieten","to rent","Ich möchte ein Auto mieten."],
+["die Milch","milk","Die Milch steht im Kühlschrank."],
+["mindestens","at least","Ich warte schon mindestens 20 Minuten."],
+["das Mineralwasser","mineral water","Ein Glas Mineralwasser, bitte."],
+["mit","with","Fahren wir mit dem Auto oder mit dem Zug?"],
+["der Mitarbeiter","employee, coworker","Unsere Firma hat sieben Mitarbeiter."],
+["das Mittagessen","lunch","Um zwölf Uhr gibt es Mittagessen."],
+["die Mitte","middle","Den Tisch stellen wir in die Mitte."],
+["das Mittel","remedy, agent","Haben Sie ein Mittel gegen Magenschmerzen?"],
+["die Möbel","furniture","Eure Möbel sind sehr schön."],
+["das Mobiltelefon","mobile phone","Haben Sie ein Mobiltelefon?"],
+["möchten","would like","Was möchten Sie trinken?"],
+["die Mode","fashion","Wie findest du die neue Mode?"],
+["modern","modern","Das Stadtzentrum ist sehr modern."],
+["mögen","to like","Magst du Schokolade?"],
+["möglich","possible","Das ist leider nicht möglich."],
+["der Moment","moment","Einen Moment, bitte."],
+["morgen","tomorrow","Morgen beginnt die Schule erst um zehn Uhr."],
+["der Motor","engine, motor","Der Motor ist kaputt."],
+["der Motorroller","scooter","Oskar fährt mit dem Motorroller zur Arbeit."],
+["müde","tired","Ich bin müde. Ich gehe schlafen."],
+["der Müll","trash, garbage","Bringst du bitte den Müll raus?"],
+["der Mund","mouth","Öffnen Sie bitte den Mund."],
+["das Museum","museum","Im Kunstmuseum gibt es eine neue Ausstellung."],
+["die Musik","music","Wie findest du die Musik?"],
+["müssen","must, have to","Ich muss jeden Tag von 8 bis 18 Uhr arbeiten."],
+["die Mütze","cap, hat","Haben Sie rote Mützen?"]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: M"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — N / O
+   ====================================================== */
+...[
+["nach","after; to (places)","Ich fliege nach München."],
+["der Nachbar / die Nachbarin","neighbor","Mein Nachbar kommt aus Brasilien."],
+["die Nachricht","message, news","Ich schreibe dir später eine Nachricht."],
+["nächste, -er, -es","next","Sehen wir uns nächste Woche?"],
+["die Nähe","vicinity, nearness","Die Post ist in der Nähe vom Bahnhof."],
+["der Name","name","Wie ist Ihr Name?"],
+["nass","wet","Du bist ja ganz nass."],
+["die Natur","nature","Ich bin gern draußen in der Natur."],
+["natürlich","of course, naturally","Natürlich helfen wir dir."],
+["neben","next to, beside","Die Apotheke ist neben der Post."],
+["nebenan","next door","Das ist José. Er wohnt nebenan."],
+["neblig","foggy","Fahr vorsichtig! Es ist neblig."],
+["nehmen","to take","Nehmen Sie die Tabletten vor dem Essen!"],
+["nein","no","Möchten Sie ein Stück Kuchen? – Nein, danke."],
+["nennen","to call, name","Alle nennen ihn Alex."],
+["nervös","nervous","Bei Prüfungen bin ich immer sehr nervös."],
+["nett","nice","Ich habe viele nette Kollegen."],
+["neu","new","Wir haben eine neue Wohnung."],
+["nicht","not","Das stimmt nicht."],
+["nichts","nothing","Das macht nichts."],
+["nie","never","Er kommt nie pünktlich."],
+["niemand","nobody","Hier ist niemand."],
+["nirgends","nowhere","Hier kann man nirgends parken."],
+["noch","still, yet","Vielleicht kommt er noch."],
+["normal","normal","Das ist doch ganz normal."],
+["die Note","grade, mark","Eva hat immer sehr gute Noten."],
+["notieren","to note down","Notieren Sie bitte alle wichtigen Informationen."],
+["die Notiz","note","Schreib mir bitte eine Notiz."],
+["notwendig","necessary","Das ist nicht notwendig."],
+["die Nudel","noodle, pasta","Möchten Sie lieber Reis oder Nudeln?"],
+["die Nummer","number","Können Sie mir Ihre Nummer geben?"],
+["nur","only","Ich möchte nur ein Glas Wasser."],
+["nützlich","useful","Danke für den Tipp. Er war sehr nützlich."],
+["oben","upstairs, above","Ich wohne oben im 4. Stock."],
+["das Obst","fruit","Obst kaufe ich immer auf dem Markt."],
+["oder","or","Wann können Sie kommen – heute oder morgen?"],
+["offen","open","Ist das Fenster im Bad noch offen?"],
+["öffnen","to open","Ich öffne die Tür."],
+["oft","often","Ich gehe nicht oft ins Kino."],
+["ohne","without","Bitte einen Kaffee ohne Milch und Zucker."],
+["das Ohr","ear","Ich habe Ohrenschmerzen."],
+["das Öl","oil","Können Sie bei meinem Auto das Öl kontrollieren?"],
+["online","online","Wann bist du wieder online?"],
+["die Orange","orange (fruit)","Ich esse gern Orangen."],
+["die Ordnung","order, tidiness","Das ist alles in Ordnung."],
+["organisieren","to organize","Frau Gomez organisiert unseren Ausflug."],
+["der Ort","place, location","Der Ort liegt in den Bergen."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: N & O"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — P / Q
+   ====================================================== */
+...[
+["das Paar","pair, couple","Ich brauche ein Paar Schuhe."],
+["ein paar","a few","Hast du ein paar Minuten Zeit?"],
+["packen","to pack","Ich muss noch meinen Koffer packen."],
+["das Paket","package","Bringst du bitte das Paket zur Post?"],
+["das Papier","paper","Hier sind Papier und Bleistift."],
+["die Papiere","documents, papers","Haben Sie Ihre Papiere dabei?"],
+["das Parfüm","perfume","Ich suche ein Parfum als Geschenk."],
+["der Park","park","Ich gehe gern im Park spazieren."],
+["parken","to park","Darf ich hier parken?"],
+["der Partner / die Partnerin","partner","Veronika ist meine Partnerin."],
+["die Party","party","Heute Abend machen wir eine Party."],
+["der Pass","passport","Am Flughafen brauchst du deinen Pass."],
+["passen","to fit, suit","Die Bluse passt mir nicht."],
+["passieren","to happen","Was ist passiert?"],
+["das Passwort","password","Ich habe mein Passwort vergessen."],
+["die Pause","break","Von 12 bis 12.30 Uhr haben wir Mittagspause."],
+["die Person","person","Eintritt pro Person: 5 Euro."],
+["das Pferd","horse","Amira liebt Pferde."],
+["die Pflanze","plant","Können Sie sich um unsere Pflanzen kümmern?"],
+["die Pizza","pizza","Mein Lieblingsessen ist Pizza."],
+["das Plakat","poster, sign","Wir machen ein Plakat zum Thema Essen."],
+["der Plan","plan","Ich kaufe mir einen Stadtplan."],
+["planen","to plan","Wir sollen eine Klassenparty planen."],
+["der Platz","place, seat, square","Hier ist noch ein Platz frei."],
+["plötzlich","suddenly","Plötzlich war das Licht aus."],
+["die Polizei","police","Rufen Sie die Polizei!"],
+["die Pommes frites","French fries","Die Kinder essen Bratwurst mit Pommes frites."],
+["die Portion","portion, serving","Ich nehme eine kleine Portion Eis."],
+["die Post","post office; mail","Ist Post für mich da?"],
+["das Poster","poster","Das Poster hängt über dem Bett."],
+["die Postkarte","postcard","Schreibst du mir eine Postkarte aus Kanada?"],
+["die Postleitzahl","postal code","Wie ist Ihre Postleitzahl?"],
+["das Praktikum","internship","Ich mache ein Praktikum bei Siemens."],
+["praktisch","practical","Das finde ich sehr praktisch."],
+["die Praxis","(medical) practice, office","Unsere Praxis ist ab acht Uhr geöffnet."],
+["der Preis","price","Die Preise sind hier viel höher als bei uns."],
+["preiswert","good value, inexpensive","Die Jacke ist sehr preiswert."],
+["privat","private","Das ist meine private Handynummer."],
+["pro","per","Das Zimmer kostet 100 Euro pro Nacht."],
+["probieren","to try","Möchten Sie den Käse probieren?"],
+["das Problem","problem","Ich habe ein Problem."],
+["das Produkt","product","Unsere Produkte haben eine sehr hohe Qualität."],
+["das Programm","program","Was kommt heute im Kino?"],
+["das Projekt","project","Wir machen ein Projekt über Sehenswürdigkeiten."],
+["der Prospekt","brochure","Bitte schicken Sie mir einen Prospekt."],
+["prüfen","to check, examine","Bitte prüfen Sie die Rechnung sofort."],
+["die Prüfung","exam","Ich habe die Prüfung bestanden."],
+["der Pullover","sweater","Ich muss mir einen Pullover kaufen."],
+["pünktlich","punctual","Herr Müller ist immer pünktlich."],
+["putzen","to clean","Ich muss heute noch das Bad putzen."],
+["die Qualität","quality","Dieser Fernseher hat eine gute Qualität."],
+["das Quiz","quiz","Sie hat beim Quiz gewonnen."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: P & Q"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — R
+   ====================================================== */
+...[
+["das Radio","radio","Ich höre im Auto gern Radio."],
+["raten","to guess; to advise","Was raten Sie mir?"],
+["das Rathaus","city hall","Sie müssen sich im Rathaus anmelden."],
+["das Rätsel","puzzle, riddle","Das Rätsel ist schwierig!"],
+["rauchen","to smoke","Rauchen ist hier verboten!"],
+["der Raum","room, space","Der Unterricht findet in Raum 332 statt."],
+["rechnen","to calculate","Sarah kann gut rechnen."],
+["die Rechnung","bill, invoice","Bitte, die Rechnung!"],
+["recht haben","to be right","Du hast (nicht) recht."],
+["rechts","right (direction)","Der Bahnhof ist hier rechts."],
+["reden","to talk","Mit meiner Freundin kann ich über alles reden."],
+["der Regen","rain","Bei Regen gehe ich nicht aus dem Haus."],
+["regnen","to rain","Wenn es regnet, bleiben wir zu Hause."],
+["reich","rich","Lotte ist reich."],
+["der Reifen","tire","Ich brauche neue Reifen für mein Auto."],
+["die Reihe","row","Wir sitzen in der dritten Reihe."],
+["die Reinigung","dry cleaner's","Bringst du bitte die Bluse in die Reinigung?"],
+["der Reis","rice","Ich esse gern Reis mit Gemüse und Fisch."],
+["die Reise","trip, journey","Wir machen eine Reise nach Österreich."],
+["das Reisebüro","travel agency","Wir buchen die Reise im Reisebüro."],
+["der Reiseführer","tour guide; guidebook","Ich kaufe mir einen Reiseführer von Berlin."],
+["reisen","to travel","Ich reise gern."],
+["reiten","to ride (a horse)","Möchtest du reiten lernen?"],
+["renovieren","to renovate","Wir renovieren das ganze Haus."],
+["die Reparatur","repair","Die Reparatur ist sehr teuer."],
+["reparieren","to repair","Er muss den Motor reparieren."],
+["reservieren","to reserve","Reservieren Sie bitte ein Doppelzimmer."],
+["der Rest","rest, remainder","Den Rest gebe ich dir später."],
+["das Restaurant","restaurant","Wir essen heute in einem Restaurant."],
+["das Rezept","recipe; prescription","Kannst du mir bitte das Rezept geben?"],
+["die Rezeption","reception desk","Geben Sie bitte den Schlüssel an der Rezeption ab."],
+["richtig","correct, right","Das ist richtig."],
+["riechen","to smell","Diese Blumen riechen gut."],
+["das Rind","beef, cattle","Ich esse nur Fleisch vom Rind."],
+["der Ring","ring","Ich habe meinen Ring verloren."],
+["der Rock","skirt","Der Rock ist zu eng."],
+["romantisch","romantic","Dieser Film ist sehr romantisch."],
+["die Rose","rose","Er schenkt seiner Freundin rote Rosen."],
+["der Rücken","back (body)","Mein Rücken tut mir weh."],
+["der Rucksack","backpack","Ich nehme lieber einen Rucksack."],
+["rufen","to call, shout","Wir müssen einen Arzt rufen."],
+["die Ruhe","peace, quiet","Ruhe, bitte!"],
+["ruhig","calm, quiet","Ich möchte ein ruhiges Zimmer."],
+["rund","round; approximately","Unser Wohnzimmertisch ist rund."],
+["der Rundgang","tour, walk-through","Der Rundgang beginnt in wenigen Minuten."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: R"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — S
+   ====================================================== */
+...[
+["die Sache","thing, matter","Nimm deine Sachen und komm!"],
+["der Saft","juice","Möchtest du einen Apfelsaft?"],
+["sagen","to say","Wie sagt man „sorry“ auf Deutsch?"],
+["der Salat","salad","Möchten Sie zum Fisch einen Salat?"],
+["das Salz","salt","Kann ich bitte Salz haben?"],
+["sammeln","to collect","Peter sammelt Briefmarken."],
+["der Satz","sentence","Den letzten Satz verstehe ich nicht."],
+["sauber","clean","Bringen Sie mir bitte ein sauberes Glas!"],
+["sauer","sour; annoyed","Zitronen sind mir zu sauer."],
+["schade","a pity, shame","Schade, dass du nicht kommen kannst."],
+["schädlich","harmful","Rauchen ist schädlich für die Gesundheit."],
+["schaffen","to manage, accomplish","Geschafft! Das Projekt ist endlich fertig."],
+["der Schalter","counter, service window","Gehen Sie bitte zum Schalter drei!"],
+["scharf","spicy; sharp","Die Suppe ist mir zu scharf."],
+["scheinen","to shine; to seem","Die Sonne scheint."],
+["schenken","to give (as a gift)","Was schenken wir Michael zum Geburtstag?"],
+["die Schere","scissors","Die Schere schneidet nicht gut."],
+["schicken","to send","Bitte schicken Sie mir eine E-Mail."],
+["das Schiff","ship","Wir fahren mit dem Schiff von Basel nach Köln."],
+["das Schild","sign","Haben Sie das Schild nicht gesehen?"],
+["schimpfen","to scold, grumble","Warum schimpfst du denn so laut?"],
+["der Schirm","umbrella","Nimm den Schirm mit, es regnet."],
+["schlafen","to sleep","Ich schlafe meistens acht Stunden."],
+["das Schlafzimmer","bedroom","Hier ist das Schlafzimmer."],
+["schlecht","bad","Mir geht es schlecht. Ich habe Fieber."],
+["schließen","to close","Bitte schließen Sie die Tür."],
+["schlimm","bad, serious","Das ist nicht so schlimm."],
+["das Schloss","castle; lock","Am Wochenende besichtigen wir Schloss Neuschwanstein."],
+["der Schluss","end","Ich muss jetzt Schluss machen."],
+["der Schlüssel","key","Ich finde meinen Schlüssel nicht."],
+["schmecken","to taste","Schmeckt dir die Suppe?"],
+["der Schmerz","pain","Ich habe Bauchschmerzen."],
+["schmutzig","dirty","Das Handtuch ist schmutzig."],
+["der Schnee","snow","In den Bergen liegt viel Schnee."],
+["schneiden","to cut","Wer schneidet dir die Haare?"],
+["schneien","to snow","Morgen schneit es."],
+["schnell","fast","Warum fährst du so schnell?"],
+["die Schokolade","chocolate","Julia liebt Schokolade."],
+["schon","already","Ich wohne schon seit fünf Jahren in Freiburg."],
+["schön","beautiful, nice","Das Bild ist sehr schön."],
+["der Schrank","closet, cabinet","Die Gläser stehen im Schrank."],
+["schrecklich","terrible","Ich finde den Film schrecklich."],
+["schreiben","to write","Ich schreibe dir eine E-Mail."],
+["schriftlich","in writing","Sie müssen sich schriftlich anmelden."],
+["der Schuh","shoe","Zieh die Schuhe aus!"],
+["die Schule","school","Meine Tochter geht schon in die Schule."],
+["der Schüler / die Schülerin","student, pupil","In meinem Kurs sind acht Schülerinnen."],
+["schwach","weak","Ich fühle mich sehr schwach."],
+["schwanger","pregnant","Lena ist schwanger."],
+["das Schwein","pig, pork","Ich esse kein Schweinefleisch."],
+["schwer","heavy; difficult","Das ist eine schwere Arbeit."],
+["schwierig","difficult","Die Prüfung war nicht schwierig."],
+["das Schwimmbad","swimming pool","Kommst du mit ins Schwimmbad?"],
+["schwimmen","to swim","Ich schwimme täglich einen Kilometer."],
+["der See","lake","Komm, wir fahren an den Bodensee."],
+["die See","sea","Wir machen Urlaub an der Nordsee."],
+["sehen","to see","Ich kann dich nicht sehen."],
+["die Sehenswürdigkeit","sight, landmark","Welche Sehenswürdigkeiten gibt es in Frankfurt?"],
+["sehr","very","Das Wetter ist heute sehr schön."],
+["die Seife","soap","Hier gibt es keine Seife."],
+["sein","to be","Ich bin Mechaniker."],
+["seit","since, for (time)","Ich wohne seit drei Jahren in Köln."],
+["die Seite","page; side","Öffnen Sie das Kursbuch auf Seite 20."],
+["selbst","oneself","Ich mache das selbst."],
+["die Sendung","broadcast, program","Welche Sendungen schaust du gern an?"],
+["der Service","service","Ich bin mit dem Service zufrieden."],
+["sich setzen","to sit down","Setz dich doch!"],
+["sicher","safe; certain","Ich bin ganz sicher, dass er kommt."],
+["singen","to sing","Er singt gern."],
+["die Situation","situation","Ich bin in einer schwierigen Situation."],
+["sitzen","to sit","Wo möchten Sie sitzen?"],
+["der Ski","ski","Gehen wir am Wochenende Ski fahren?"],
+["so","so, like this","Meine Frau ist so groß wie ich."],
+["das Sofa","sofa","Das Sofa ist bequem."],
+["sofort","immediately","Bitte antworten Sie sofort."],
+["sogar","even","Sogar meine Tante aus Kanada kommt."],
+["sollen","should, supposed to","Was soll ich mitbringen?"],
+["die Sonne","sun","Die Sonne scheint."],
+["sonnig","sunny","Morgen ist das Wetter wieder sonnig."],
+["sonst","otherwise; else","Beeil dich, sonst kommen wir zu spät!"],
+["spannend","exciting, suspenseful","Ich finde den Film sehr spannend."],
+["sparen","to save (money)","Ein neues Auto ist sehr teuer. Ich muss sparen."],
+["der Spaß","fun","Viel Spaß!"],
+["spät","late","Es ist schon spät, ich muss gehen."],
+["später","later","Das können wir später machen."],
+["spazieren gehen","to go for a walk","Wir gehen sonntags immer spazieren."],
+["der Spaziergang","walk, stroll","Abends mache ich immer einen Spaziergang."],
+["speichern","to save (data)","Sie müssen die Datei speichern."],
+["die Speisekarte","menu","Bringen Sie uns bitte die Speisekarte."],
+["das Spiel","game","Welche Kartenspiele kennen Sie?"],
+["spielen","to play","Die Kinder spielen draußen."],
+["der Sport","sports","Ich mache viel Sport."],
+["sportlich","athletic","Tom ist sehr sportlich."],
+["der Sportplatz","sports field","Das Fußballtraining ist auf dem Sportplatz."],
+["die Sprache","language","Welche Sprachen sprichst du?"],
+["sprechen","to speak","Kann ich mit Herrn Klein sprechen?"],
+["die Sprechstunde","office hours, consultation","Frau Doktor Weiß hat Sprechstunde."],
+["die Stadt","city","Heidelberg ist eine alte Stadt."],
+["der Stadtplan","city map","Haben Sie einen Stadtplan von Salzburg?"],
+["der Star","star (celebrity)","Diese Sängerin ist ein Star in Deutschland."],
+["stark","strong","Ich habe starke Kopfschmerzen."],
+["stattfinden","to take place","Das Spiel findet auch bei Regen statt."],
+["stehen","to stand; to be written","Was steht heute in der Zeitung?"],
+["die Stelle","position, job; spot","Ich habe eine neue Stelle."],
+["stellen","to put, place (upright)","Stell die Milch bitte in den Kühlschrank!"],
+["sterben","to die","Sein Vater ist gestern gestorben."],
+["der Stiefel","boot","Wie viel kosten die roten Stiefel?"],
+["der Stift","pen, pencil","Kannst du mir bitte einen Stift geben?"],
+["das Stipendium","scholarship","Ich bekomme ein Stipendium."],
+["der Stock / das Stockwerk","floor, story","Unsere Wohnung liegt im ersten Stock."],
+["stören","to disturb, bother","Störe ich?"],
+["der Strand","beach","Im Urlaub bin ich am liebsten am Strand."],
+["die Straße","street","In welcher Straße wohnen Sie?"],
+["die Straßenbahn","tram","Fahren wir mit der Straßenbahn?"],
+["sich streiten","to argue","Die Kinder streiten oft."],
+["streng","strict","Der Lehrer ist sehr streng."],
+["der Stress","stress","Ich habe bei der Arbeit viel Stress."],
+["stressig","stressful","Meine Arbeit ist stressig."],
+["das Stück","piece","Möchten Sie noch ein Stück Kuchen?"],
+["der Student / die Studentin","student (university)","Ich bin Studentin."],
+["studieren","to study (university)","Ich studiere in Mainz."],
+["das Studium","studies, degree program","Das Studium dauert drei Jahre."],
+["der Stuhl","chair","Ist der Stuhl frei?"],
+["suchen","to look for","Suchst du etwas?"],
+["super","great, super","Der Film ist super."],
+["der Supermarkt","supermarket","Ich kaufe oft im Supermarkt ein."],
+["die Suppe","soup","Schmeckt dir die Suppe?"],
+["surfen","to surf","Surfst du oft im Internet?"],
+["süß","sweet","Ich finde die Torte zu süß."],
+["die Süßigkeiten","sweets, candy","Welche Süßigkeiten isst du am liebsten?"],
+["sympathisch","likeable","Der neue Chef ist sehr sympathisch."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: S"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — T
+   ====================================================== */
+...[
+["das Tablet","tablet (device)","Hast du ein Tablet?"],
+["die Tablette","tablet, pill","Du sollst am Abend zwei Tabletten nehmen."],
+["die Tafel","board (chalkboard); panel","Der Lehrer schreibt das neue Wort an die Tafel."],
+["tanzen","to dance","Tanzen Sie gern?"],
+["die Tasche","bag","Ich habe die Schlüssel in der Tasche."],
+["das Taschengeld","allowance, pocket money","Wie viel Taschengeld bekommen deine Kinder?"],
+["die Tasse","cup","Möchten Sie eine Tasse Kaffee?"],
+["(aus)tauschen","to exchange, swap","Können wir bitte die Plätze tauschen?"],
+["das Taxi","taxi","Bitte rufen Sie mir ein Taxi."],
+["das Team","team","Ich arbeite gern in einem Team."],
+["der Tee","tea","Ich trinke morgens immer Tee."],
+["teilen","to share, divide","Wollen wir die Pizza teilen?"],
+["teilnehmen","to take part, participate","Ich möchte an dem Tanzkurs teilnehmen."],
+["das Telefon","telephone","Darf ich bitte Ihr Telefon benutzen?"],
+["telefonieren","to talk on the phone","Ich muss kurz telefonieren."],
+["der Teller","plate","Stell die Teller bitte auf den Tisch!"],
+["das Tennis","tennis","Steffi spielt sehr gut Tennis."],
+["der Termin","appointment","Ich habe heute einen Termin bei meiner Zahnärztin."],
+["teuer","expensive","Das ist mir zu teuer."],
+["der Text","text","Lesen Sie bitte den Text."],
+["das Theater","theater","Ich gehe nicht gern ins Theater."],
+["das Thema","topic","Heute heißt unser Thema: Essen und Trinken."],
+["das Ticket","ticket","Wie viel kostet das Ticket?"],
+["tief","deep","Vorsicht, das Wasser ist tief!"],
+["das Tier","animal","Meine Lieblingstiere sind Katzen."],
+["der Tipp","tip, advice","Kannst du mir einen guten Tipp geben?"],
+["der Tisch","table","Das Essen steht schon auf dem Tisch."],
+["der Titel","title","Wie heißt der Film? Ich weiß den Titel nicht mehr."],
+["die Toilette","toilet","Wo ist die Toilette, bitte?"],
+["toll","great, cool","Der Urlaub war toll."],
+["die Tomate","tomato","Die Tomate ist noch grün."],
+["der Topf","pot","Hast du keinen größeren Topf?"],
+["die Torte","cake, gateau","Zum Geburtstag backe ich dir eine Torte."],
+["tot","dead","Meine Großeltern sind schon lange tot."],
+["total","totally","Der Film ist total langweilig."],
+["die Tour","tour","Ich kenne eine schöne Tour in den Bergen."],
+["der Tourist / die Touristin","tourist","Im Sommer kommen viele Touristen."],
+["tragen","to carry; to wear","Er trägt heute einen blauen Anzug."],
+["trainieren","to train, practice","Wir trainieren einmal pro Woche."],
+["das Training","training, practice","Das Training ist immer dienstags."],
+["der Traum","dream","Eine eigene Firma, das ist mein Traum."],
+["träumen","to dream","Ich habe schlecht geträumt."],
+["traurig","sad","Ich bin sehr traurig."],
+["sich treffen","to meet","Wir treffen uns immer freitags."],
+["die Treppe","stairs","Ich nehme die Treppe, nicht den Aufzug."],
+["trinken","to drink","Möchtest du etwas trinken?"],
+["trocken","dry","Die Wäsche ist bald trocken."],
+["tschüs","bye","Tschüs, bis morgen!"],
+["das T-Shirt","t-shirt","Haben Sie dieses T-Shirt auch in M?"],
+["tun","to do","Was kann ich für Sie tun?"],
+["die Tür","door","Mach bitte die Tür zu!"],
+["typisch","typical","Typisch Anna, sie kommt natürlich wieder zu spät."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: T"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — U / V
+   ====================================================== */
+...[
+["unbedingt","absolutely, definitely","Ich muss unbedingt mit dir sprechen."],
+["und","and","Ich kaufe ein und mein Mann kocht."],
+["der Unfall","accident","Ich hatte gestern einen Unfall."],
+["die Universität","university","Er studiert an der Universität Freiburg."],
+["unten","downstairs, below","Er wohnt ganz unten im Haus."],
+["unter","under, below","Unter uns wohnt eine Familie."],
+["sich unterhalten","to chat, converse","Wir haben uns über das Fußballspiel unterhalten."],
+["die Unterkunft","accommodation","Ich suche noch eine Unterkunft in Basel."],
+["unternehmen","to do, undertake (an activity)","Wollen wir heute Abend etwas unternehmen?"],
+["der Unterricht","class, lesson","Der Unterricht dauert bis 19 Uhr."],
+["der Unterschied","difference","Was ist der Unterschied zwischen den beiden Kursen?"],
+["unterschreiben","to sign","Wo muss ich unterschreiben?"],
+["die Unterschrift","signature","Hier fehlt noch Ihre Unterschrift."],
+["untersuchen","to examine","Der Arzt hat mich untersucht."],
+["unterwegs sein","to be on the way, out","Ich bin unterwegs und komme gleich."],
+["der Urlaub","vacation","Ich nehme im September Urlaub."],
+["verabredet sein","to have a date/appointment","Ich bin mit meiner Freundin verabredet."],
+["die Veranstaltung","event","Wir haben eine Veranstaltung."],
+["verbieten / verboten sein","to forbid / to be forbidden","Hier ist Rauchen verboten."],
+["verdienen","to earn","Ich verdiene 1.500 Euro im Monat."],
+["der Verein","club, association","Es gibt einen neuen Sportverein in der Stadt."],
+["vereinbaren","to arrange, agree on","Können wir einen Termin vereinbaren?"],
+["vergessen","to forget","Ich habe meine Hausaufgaben vergessen."],
+["vergleichen","to compare","Vergleichen Sie die Angebote!"],
+["verkaufen","to sell","Er verkauft sein altes Auto."],
+["der Verkehr","traffic","Morgens gibt es hier immer viel Verkehr."],
+["das Verkehrsmittel","means of transport","Welche Verkehrsmittel benutzen Sie oft?"],
+["sich verletzen","to injure oneself","Sind Sie verletzt?"],
+["sich verlieben","to fall in love","Ich bin total verliebt."],
+["verlieren","to lose","Ich habe meinen Schlüssel verloren."],
+["vermieten","to rent out","Die Wohnung ist schon vermietet."],
+["der Vermieter / die Vermieterin","landlord / landlady","Unser Vermieter ist nett."],
+["verpassen","to miss (e.g. a train)","Ich habe den Zug verpasst."],
+["verreisen","to go on a trip","Verreist ihr in den Ferien?"],
+["verschieben","to postpone","Leider muss ich den Termin verschieben."],
+["verschieden","different","Unsere beiden Kinder sind sehr verschieden."],
+["die Verspätung","delay","Unser Zug hat 15 Minuten Verspätung."],
+["verstehen","to understand","Können Sie mich verstehen?"],
+["versuchen","to try","Kann ich es auch einmal versuchen?"],
+["der Vertrag","contract","Ich muss den Vertrag noch unterschreiben."],
+["viel, e","much, many","Ich habe leider nicht viel Zeit."],
+["vielleicht","maybe","Vielleicht bekomme ich diesen Job."],
+["der Vogel","bird","Morgens singen die Vögel laut."],
+["voll","full","Die Flasche ist noch ganz voll."],
+["der Volleyball","volleyball","Ich spiele gern Volleyball."],
+["von","from, of","Das Auto von Felix ist kaputt."],
+["vor","in front of; ago","Er ist vor einer Stunde gegangen."],
+["vorbei","past, over","Kommst du morgen bei mir vorbei?"],
+["vorbereiten","to prepare","Ich muss mich auf meine Prüfung vorbereiten."],
+["vorgestern","the day before yesterday","Er hat mich vorgestern angerufen."],
+["vorher","beforehand","Vorher muss ich aber noch zur Bank."],
+["vorn(e)","in front","Bitte vorn(e) einsteigen!"],
+["der Vorname","first name","Mein Vorname ist Eva."],
+["der Vorschlag","suggestion","Hast du einen guten Vorschlag?"],
+["vorsichtig","careful","Sei vorsichtig!"],
+["sich vorstellen","to introduce oneself; to imagine","Können Sie sich bitte vorstellen?"],
+["vorwärts","forward","Fahren Sie bitte noch ein Stück vorwärts."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: U & V"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — W
+   ====================================================== */
+...[
+["wach","awake","Bist du schon lange wach?"],
+["der Wagen","car; (train) car","Wo steht Ihr Wagen?"],
+["wählen","to choose; to dial","Sie müssen erst eine Null wählen."],
+["wahr","true","Das ist (nicht) wahr!"],
+["wahrscheinlich","probably","Er kommt wahrscheinlich nicht."],
+["der Wald","forest","Im Wald ist es ruhig."],
+["wandern","to hike","Wir gehen oft wandern."],
+["wann","when","Wann bist du fertig?"],
+["warm","warm","Hier ist es sehr warm."],
+["warten","to wait","Können Sie ein paar Minuten warten?"],
+["warum","why","Warum kommt er nicht?"],
+["die Wäsche","laundry","Ich muss noch Wäsche waschen."],
+["sich waschen","to wash","Wo kann ich mir die Hände waschen?"],
+["das Wasser","water","Ein Glas Wasser, bitte."],
+["die Webseite","website","Es gibt viele Webseiten mit Grammatikübungen."],
+["wechseln","to change, exchange","Können Sie mir zehn Dollar wechseln?"],
+["wecken","to wake (someone) up","Bitte wecken Sie mich morgen früh um fünf."],
+["weg","gone, away","Meine Brille ist weg."],
+["der Weg","way, path","Das ist der kürzeste Weg."],
+["wegen","because of","Wegen seiner Arbeit kann er nicht kommen."],
+["wehtun","to hurt","Wo tut es weh?"],
+["weiblich","female","Wählen Sie bitte: weiblich oder männlich."],
+["weich","soft","Ich möchte zum Frühstück ein weiches Ei."],
+["weil","because","Ich kann nicht kommen, weil ich arbeiten muss."],
+["der Wein","wine","Nein danke, ich möchte keinen Wein."],
+["weinen","to cry","Warum weint das Baby?"],
+["weit","far","Zum Bahnhof ist es nicht weit."],
+["weiter","further, continue","Können wir jetzt weitermachen?"],
+["welcher, -e, -s","which","Welche Bluse nehmen Sie?"],
+["die Welt","world","Ich möchte gern einmal um die Welt reisen."],
+["wenig, -e","little, few","Ich habe leider nur wenig verstanden."],
+["wenigstens","at least","Essen Sie wenigstens ein Stück Kuchen."],
+["wenn","if, when","Wenn ich nicht arbeiten muss, komme ich."],
+["wer","who","Wer ist das?"],
+["werden","to become","Mein Sohn will Arzt werden."],
+["die Werkstatt","workshop, repair shop","Mein Auto ist in der Werkstatt."],
+["der Wettbewerb","competition","Mein Sohn hat bei einem Wettbewerb gewonnen."],
+["das Wetter","weather","Heute ist das Wetter gut."],
+["wichtig","important","Es ist wichtig, dass Sie auch kommen."],
+["wie","how; like, as","Wie heißt du?"],
+["wie viel, -e","how much, how many","Wie viel kostet diese Hose?"],
+["wieder","again","Wann kommst du wieder?"],
+["wiederholen","to repeat","Können Sie das bitte wiederholen?"],
+["das Wiederhören","goodbye (on the phone)","Auf Wiederhören!"],
+["das Wiedersehen","goodbye","Auf Wiedersehen!"],
+["willkommen","welcome","Herzlich willkommen in Berlin!"],
+["der Wind","wind","Der Wind ist kalt."],
+["windig","windy","Heute ist es sehr windig."],
+["wirklich","really","Es ist aber wirklich so."],
+["wissen","to know (a fact)","Weißt du, wie der Hausmeister heißt?"],
+["der Witz","joke","Wir haben Witze erzählt und viel gelacht."],
+["witzig","funny, witty","Ich finde das nicht witzig."],
+["wo","where","Wo waren Sie im Urlaub?"],
+["woher","where from","Woher kommen Sie?"],
+["wohin","where to","Wohin fährt dieser Bus?"],
+["wohnen","to live, reside","Ich wohne in Kiel."],
+["die Wohnung","apartment","Meine Wohnung ist sehr hell."],
+["das Wohnzimmer","living room","Die Kinder sitzen im Wohnzimmer."],
+["die Wolke","cloud","Heute gibt es viele Wolken."],
+["wollen","to want","Wollen Sie einen Kaffee trinken?"],
+["der Workshop","workshop (event)","Das war ein toller Workshop."],
+["das Wort","word","Ich kenne das Wort nicht."],
+["wunderbar","wonderful","Diese Schokolade schmeckt wunderbar."],
+["der Wunsch","wish","Ich wünsche Ihnen alles Gute!"],
+["wünschen","to wish","Ich wünsche mir eine Kamera zum Geburtstag."],
+["die Wurst","sausage","Eine Wurst mit Pommes, bitte."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: W"})),
+
+/* ======================================================
+   ALPHABETISCHER WORTSCHATZ — Z
+   ====================================================== */
+...[
+["die Zahl","number, figure","Können Sie die Zahl bitte wiederholen?"],
+["zahlen","to pay","Entschuldigung, zahlen bitte!"],
+["der Zahn","tooth","Der Zahn tut mir schon seit einer Woche weh."],
+["zeichnen","to draw","Caterina kann gut zeichnen."],
+["zeigen","to show","Können Sie mir bitte den Weg zeigen?"],
+["die Zeit","time","Ich habe heute keine Zeit."],
+["die Zeitschrift","magazine","Diese Zeitschrift kauft Andrea jede Woche."],
+["die Zeitung","newspaper","Wo ist die Zeitung von heute?"],
+["das Zelt","tent","Im Sommer schlafen wir manchmal im Zelt."],
+["das Zentrum","center","Der Bahnhof ist im Stadtzentrum."],
+["der Zettel","note, slip of paper","Hast du einen Zettel für mich?"],
+["das Zeugnis","report card, certificate","Morgen bekommen die Kinder ihr Zeugnis."],
+["(an-)/(aus)ziehen","to put on / take off (clothes)","Ich ziehe mir eine Jacke an."],
+["das Ziel","goal, destination","Was ist dein Ziel im Leben?"],
+["das Zimmer","room","Die Wohnung hat drei Zimmer."],
+["der Zirkus","circus","Heute gehen wir in den Zirkus."],
+["die Zitrone","lemon","Ich trinke den Tee mit Zitrone."],
+["der Zoo","zoo","Am Sonntag gehen wir in den Zoo."],
+["zu","to; too; closed","Das Kleid ist mir zu teuer."],
+["der Zucker","sugar","Trinken Sie den Tee mit oder ohne Zucker?"],
+["zuerst","first, at first","Zuerst müsst ihr die Hausaufgaben machen."],
+["zufrieden","satisfied","Ich bin mit der Wohnung zufrieden."],
+["der Zug","train","Ich fahre gern mit dem Zug."],
+["zuhören","to listen","Hör mir doch mal zu!"],
+["zuletzt","last, finally","Wir haben uns vor drei Jahren zuletzt gesehen."],
+["zum Beispiel","for example","Mein Freund hat viele Hobbys, zum Beispiel Kochen."],
+["zumachen","to close","Machst du bitte das Fenster zu?"],
+["zurück","back","Eine Fahrkarte nach Frankfurt und zurück, bitte."],
+["zurück(fahren, geben, gehen, kommen, laufen)","to go back, return, give back","Wann kommst du zurück?"],
+["zusammen","together","Wollen wir zusammen essen gehen?"],
+["zwischen","between","Heidelberg liegt zwischen Frankfurt und Stuttgart."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Alphabet: Z"})),
+
+/* ======================================================
+   ERGÄNZUNG: WOHNEN & PERSON
+   Words from exam training book missing from alphabetical decks
+   ====================================================== */
+...[
+["die Staatsangehörigkeit / Nationalität","citizenship, nationality","Welche Staatsangehörigkeit haben Sie?"],
+["der Wohnort","place of residence","Wohnort: Berlin."],
+["die Hausnummer","house number","Wie ist Ihre Hausnummer?"],
+["die Telefonnummer","phone number","Können Sie mir Ihre Telefonnummer geben?"],
+["die Vorwahl","area code, dialing code","Die Vorwahl für München ist 089."],
+["das Geburtsdatum","date of birth","Bitte tragen Sie Ihr Geburtsdatum ein."],
+["der Familienstand","marital status","Familienstand: ledig."],
+["der Flur","hallway, corridor","Die Schuhe stehen im Flur."],
+["der Sessel","armchair","Der Sessel ist sehr bequem."],
+["der Teppich","carpet, rug","Der Teppich ist rot."],
+["der Spiegel","mirror","Im Bad hängt ein großer Spiegel."],
+["das Besteck","cutlery","Können Sie mir bitte Besteck bringen?"],
+["der Mietvertrag","rental contract","Ich muss den Mietvertrag unterschreiben."],
+["das Kinderzimmer","children's room","Die Kinder spielen im Kinderzimmer."],
+["der Quadratmeter","square metre","Die Wohnung ist 65 Quadratmeter groß."],
+["das Dach","roof","Das Dach ist kaputt. Es regnet rein."],
+["der Briefkasten","letterbox, mailbox","Bitte den Brief in den Briefkasten werfen."],
+["die Waschmaschine","washing machine","Unsere Waschmaschine ist kaputt."],
+["der/die Mieter/in","tenant","Die Mieterin wohnt schon fünf Jahre hier."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Ergänzung: Wohnen & Person"})),
+
+/* ======================================================
+   ERGÄNZUNG: REISEN & VERKEHR
+   ====================================================== */
+...[
+["die U-Bahn","underground, subway","Wir nehmen die U-Bahn zum Bahnhof."],
+["die S-Bahn","suburban train","Die S-Bahn fährt alle zehn Minuten."],
+["der LKW (Lastkraftwagen)","truck, lorry","Der LKW steht auf der Autobahn."],
+["bremsen","to brake","Bremsen Sie bitte langsam!"],
+["der Parkplatz","parking space, car park","Ich finde keinen Parkplatz."],
+["das Verkehrsschild","traffic sign","Das Verkehrsschild zeigt: Tempo 30."],
+["die Linie","line (transport)","Welche Linie fährt zum Bahnhof?"],
+["der Abflug","(flight) departure","Der Abflug ist um 14 Uhr."],
+["die Fahrt","journey, ride","Die Fahrt dauert zwei Stunden."],
+["die Reservierung","reservation","Ich habe eine Reservierung für zwei Personen."],
+["erste/zweite Klasse","first/second class","Ich möchte eine Fahrkarte zweiter Klasse."],
+["die Reisetasche","travel bag","Ich nehme nur eine Reisetasche mit."],
+["die Pension","guesthouse","Wir übernachten in einer kleinen Pension."],
+["die Stadtrundfahrt","city tour","Die Stadtrundfahrt dauert zwei Stunden."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Ergänzung: Reisen & Verkehr"})),
+
+/* ======================================================
+   ERGÄNZUNG: ESSEN, EINKAUFEN & MEDIEN
+   ====================================================== */
+...[
+["das Abendessen","dinner, supper","Was gibt es heute zum Abendessen?"],
+["Guten Appetit!","Bon appétit! / Enjoy your meal!","Guten Appetit! – Danke gleichfalls!"],
+["der Schinken","ham","Ein Sandwich mit Käse und Schinken, bitte."],
+["die Gurke","cucumber","Ich möchte einen Salat mit Gurken."],
+["die Kanne","jug, pot","Eine Kanne Kaffee, bitte."],
+["die Kneipe","pub","Wir gehen nach der Arbeit in die Kneipe."],
+["das Trinkgeld","tip (gratuity)","Das Trinkgeld ist im Service nicht enthalten."],
+["das Pfund","pound (500g)","Ein Pfund Tomaten, bitte."],
+["der Liter","litre","Einen Liter Milch, bitte."],
+["die Dose","can, tin","Eine Dose Tomaten kostet 80 Cent."],
+["die Packung","packet, pack","Eine Packung Kekse, bitte."],
+["die Kreditkarte","credit card","Kann ich mit Kreditkarte bezahlen?"],
+["die Bestellung","order","Ich möchte meine Bestellung ändern."],
+["die Überweisung","bank transfer","Ich mache eine Überweisung."],
+["ankreuzen","to tick, cross (a box)","Kreuzen Sie die richtige Antwort an."],
+["das Telefonbuch","phone book","Suchen Sie die Nummer im Telefonbuch."],
+["das Notebook","notebook computer","Ich arbeite mit einem Notebook."],
+["der USB-Stick","USB stick","Hast du die Datei auf dem USB-Stick?"],
+["das Smartphone","smartphone","Sein Smartphone ist sehr neu."],
+["erreichbar sein","to be reachable","Ab 18 Uhr bin ich nicht mehr erreichbar."],
+["die Eintrittskarte","entry ticket","Haben Sie noch Eintrittskarten?"],
+["der Sportverein","sports club","Er trainiert zweimal pro Woche im Sportverein."],
+["die CD-ROM","CD-ROM","Das Programm gibt es auf CD-ROM."],
+["die DVD","DVD","Wir schauen heute Abend eine DVD."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Ergänzung: Essen, Einkaufen & Medien"})),
+
+/* ======================================================
+   ERGÄNZUNG: GESUNDHEIT, SCHULE & UMWELT
+   ====================================================== */
+...[
+["die Nase","nose","Mir läuft die Nase. Ich bin erkältet."],
+["das Herz","heart","Das Herz ist ein wichtiges Organ."],
+["der Schnupfen","cold, runny nose","Ich habe Schnupfen und Husten."],
+["der Husten","cough (noun)","Der Husten ist schon besser."],
+["der/die Patient/in","patient","Der Arzt spricht mit dem Patienten."],
+["die Untersuchung","examination, check-up","Die Untersuchung dauert eine Stunde."],
+["Gute Besserung!","Get well soon!","Du bist krank? Gute Besserung!"],
+["der/die Hausarzt/-ärztin","GP, family doctor","Mein Hausarzt hat morgen Sprechstunde."],
+["die Grundschule","primary school","Meine Tochter geht in die Grundschule."],
+["das Gymnasium","grammar school","Er möchte aufs Gymnasium gehen."],
+["die Berufsschule","vocational school","Sie geht zweimal pro Woche zur Berufsschule."],
+["die Lehre","apprenticeship","Er macht eine Lehre als Elektriker."],
+["der Arbeitsplatz","workplace, job","Sie hat einen guten Arbeitsplatz."],
+["die Arbeitszeit","working hours","Die Arbeitszeit ist von 8 bis 17 Uhr."],
+["die Kündigung","notice, dismissal","Er hat eine Kündigung bekommen."],
+["der Nebel","fog","Bei Nebel muss man langsam fahren."],
+["giftig","poisonous, toxic","Diese Pflanze ist giftig."],
+["das Grad (Celsius)","degree (Celsius)","Es ist heute 30 Grad."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Ergänzung: Gesundheit, Schule & Umwelt"})),
+
+/* ======================================================
+   LÜCKEN — words confirmed missing from all decks above
+   ====================================================== */
+...[
+["der Monat","month","Ich lerne seit drei Monaten Deutsch."],
+["die Uhr","clock, watch","Geht deine Uhr richtig?"],
+["die Uhrzeit","time of day, clock time","Wie ist die genaue Uhrzeit?"],
+["der Geburtstag","birthday","Herzlichen Glückwunsch zum Geburtstag!"],
+["die Ecke","corner","Gehen Sie an der nächsten Ecke links."],
+["umziehen","to move (house)","Nächsten Monat ziehen wir um."],
+["sich umziehen","to get changed (clothes)","Warte bitte, ich muss mich noch umziehen."],
+["überweisen","to transfer (money)","Ich überweise dir das Geld."],
+["am + Tag (z.B. am Montag)","on + day (e.g. on Monday)","Wir treffen uns am Montag."],
+["im + Monat (z.B. im Januar)","in + month (e.g. in January)","Im Januar fahren wir in Urlaub."],
+["Gute Reise!","Have a good trip!","Tschüss und Gute Reise!"],
+["Schöne Ferien!","Have a nice holiday!","Schöne Ferien und bis September!"],
+["Guten Appetit!","Enjoy your meal!","Guten Appetit! – Danke gleichfalls!"],
+["Gute Besserung!","Get well soon!","Du bist krank? Gute Besserung!"],
+["die Kontrolle","check, inspection","Die Kontrolle beim Arzt ist wichtig."],
+["der/die Hausarzt/-ärztin","GP, family doctor","Mein Hausarzt hat morgen Sprechstunde."],
+["die Grundschule","primary school","Meine Tochter geht in die Grundschule."],
+["das Gymnasium","grammar school, high school","Er möchte aufs Gymnasium gehen."],
+["die Berufsschule","vocational school","Sie geht zweimal pro Woche zur Berufsschule."],
+["die Lehre","apprenticeship","Er macht eine Lehre als Elektriker."],
+["der Arbeitsplatz","workplace","Sie hat einen guten Arbeitsplatz."],
+["die Arbeitszeit","working hours","Die Arbeitszeit ist von 8 bis 17 Uhr."],
+["die Kündigung","dismissal, resignation","Er hat eine Kündigung bekommen."],
+["der Nebel","fog","Bei Nebel muss man langsam fahren."],
+["giftig","poisonous, toxic","Diese Pflanze ist giftig."],
+["das Grad (Celsius)","degree (Celsius)","Es ist heute 30 Grad."],
+["die Waschmaschine","washing machine","Unsere Waschmaschine ist kaputt."],
+["die Bestellung","order (for goods)","Ich möchte meine Bestellung ändern."],
+["die Überweisung","bank transfer","Ich mache eine Überweisung."],
+["der Sportverein","sports club","Er trainiert im Sportverein."],
+["die Eintrittskarte","entry ticket","Haben Sie noch Eintrittskarten?"],
+["die Kneipe","pub","Wir gehen nach der Arbeit in die Kneipe."],
+["das Trinkgeld","tip (gratuity)","Das Trinkgeld ist nicht inbegriffen."],
+["die Kreditkarte","credit card","Kann ich mit Kreditkarte zahlen?"],
+["die Dose","can, tin","Eine Dose Tomaten kostet 80 Cent."],
+["die Packung","packet, pack","Eine Packung Kekse, bitte."],
+["der Liter","litre","Einen Liter Milch, bitte."],
+["das Pfund","pound (500g)","Ein Pfund Tomaten, bitte."],
+["die Kanne","jug, pot","Eine Kanne Kaffee, bitte."],
+["der Schinken","ham","Ein Sandwich mit Käse und Schinken."],
+["die Gurke","cucumber","Ich möchte einen Salat mit Gurken."],
+["das Abendessen","dinner, supper","Was gibt es heute zum Abendessen?"],
+["die Pension","guesthouse","Wir übernachten in einer kleinen Pension."],
+["die Reisetasche","travel bag","Ich nehme nur eine Reisetasche mit."],
+["die Fahrt","journey, ride","Die Fahrt dauert zwei Stunden."],
+["der Abflug","(flight) departure","Der Abflug ist um 14 Uhr."],
+["die Reservierung","reservation","Ich habe eine Reservierung für zwei Personen."],
+["erste / zweite Klasse","first / second class","Eine Fahrkarte zweiter Klasse, bitte."],
+["die Stadtrundfahrt","city tour","Die Stadtrundfahrt dauert zwei Stunden."],
+["die U-Bahn","underground, subway","Wir nehmen die U-Bahn."],
+["die S-Bahn","suburban train","Die S-Bahn fährt alle zehn Minuten."],
+["der LKW (Lastkraftwagen)","truck, lorry","Der LKW steht auf der Autobahn."],
+["bremsen","to brake","Bremsen Sie bitte langsam!"],
+["der Parkplatz","parking space","Ich finde keinen Parkplatz."],
+["das Verkehrsschild","traffic sign","Das Verkehrsschild zeigt Tempo 30."],
+["die Linie","line (transport)","Welche Linie fährt zum Bahnhof?"],
+["die Nase","nose","Mir läuft die Nase. Ich bin erkältet."],
+["das Herz","heart","Das Herz ist ein wichtiges Organ."],
+["der Schnupfen","cold, runny nose","Ich habe Schnupfen und Husten."],
+["der Husten","cough (noun)","Der Husten ist schon besser."],
+["der/die Patient/in","patient","Der Arzt spricht mit dem Patienten."],
+["die Untersuchung","medical examination","Die Untersuchung dauert eine Stunde."],
+["das Notebook","notebook computer","Ich arbeite mit einem Notebook."],
+["der USB-Stick","USB stick","Hast du die Datei auf dem USB-Stick?"],
+["das Smartphone","smartphone","Sein Smartphone ist sehr neu."],
+["erreichbar sein","to be reachable","Ab 18 Uhr bin ich nicht mehr erreichbar."],
+["das Telefonbuch","phone book","Suchen Sie die Nummer im Telefonbuch."],
+["die Staatsangehörigkeit / Nationalität","citizenship, nationality","Welche Staatsangehörigkeit haben Sie?"],
+["der Wohnort","place of residence","Wohnort: Berlin."],
+["die Hausnummer","house number","Wie ist Ihre Hausnummer?"],
+["die Telefonnummer","phone number","Können Sie mir Ihre Telefonnummer geben?"],
+["die Vorwahl","area code","Die Vorwahl für München ist 089."],
+["das Geburtsdatum","date of birth","Bitte tragen Sie Ihr Geburtsdatum ein."],
+["der Familienstand","marital status","Familienstand: ledig."],
+["der Flur","hallway","Die Schuhe stehen im Flur."],
+["der Sessel","armchair","Der Sessel ist sehr bequem."],
+["der Teppich","carpet, rug","Der Teppich ist rot."],
+["der Spiegel","mirror","Im Bad hängt ein großer Spiegel."],
+["das Besteck","cutlery","Können Sie mir bitte Besteck bringen?"],
+["der Mietvertrag","rental contract","Ich muss den Mietvertrag unterschreiben."],
+["das Kinderzimmer","children's room","Die Kinder spielen im Kinderzimmer."],
+["der Quadratmeter","square metre","Die Wohnung ist 65 Quadratmeter groß."],
+["das Dach","roof","Das Dach ist kaputt. Es regnet rein."],
+["der Briefkasten","letterbox, mailbox","Bitte den Brief in den Briefkasten werfen."],
+["der/die Mieter/in","tenant","Die Mieterin wohnt schon fünf Jahre hier."],
+["ankreuzen","to tick, cross (a box)","Kreuzen Sie die richtige Antwort an."]
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Lücken & Ergänzung"}))
+];
+
+WORDS.forEach((w,i)=>w.id = "w"+i);
+
+/* =========================================================
+   STATE & STORAGE
+   ========================================================= */
+let progress = {}; // id -> {box, due}
+let currentDeck = null;
+let session = [];
+let sessionIdx = 0;
+let sessionStats = {known:0, again:0};
+let flipped = false;
+
+const STORE_KEY = "a2-progress";
+
+async function loadProgress(){
+  try{
+    const r = await window.storage.get(STORE_KEY);
+    progress = r ? JSON.parse(r.value) : {};
+  }catch(e){ progress = {}; }
+}
+async function saveProgress(){
+  try{ await window.storage.set(STORE_KEY, JSON.stringify(progress)); }catch(e){}
+}
+
+function getBox(id){ return (progress[id] && progress[id].box) || 0; }
+function isDue(id){
+  const p = progress[id];
+  if(!p) return true; // never studied = due
+  return Date.now() >= p.due;
+}
+const INTERVALS = [0, 1, 2, 4, 7, 14]; // days per box 0..5
+
+function markAnswer(id, correct){
+  let p = progress[id] || {box:0, due:0};
+  if(correct){ p.box = Math.min(p.box+1, 5); }
+  else{ p.box = 0; }
+  p.due = Date.now() + INTERVALS[p.box]*24*60*60*1000;
+  progress[id] = p;
+  saveProgress();
+}
+
+function deckList(){
+  const decks = {};
+  WORDS.forEach(w=>{
+    decks[w.deck] = decks[w.deck] || [];
+    decks[w.deck].push(w);
+  });
+  return decks;
+}
+
+/* =========================================================
+   RENDERING
+   ========================================================= */
+const main = document.getElementById('main');
+const headerTitle = document.getElementById('headerTitle');
+const headerSub = document.getElementById('headerSub');
+const backBtn = document.getElementById('backBtn');
+
+backBtn.onclick = ()=>renderHome();
+
+function renderHome(){
+  currentDeck = null;
+  headerTitle.textContent = "VOKABELTRAINER A2";
+  headerSub.textContent = "Goethe-Zertifikat · Wortliste";
+  backBtn.style.display = "none";
+  const decks = deckList();
+  let html = `<div class="sub" style="margin-bottom:14px;color:var(--muted);font-size:0.8rem;line-height:1.5;">${WORDS.length} Wörter · komplette Goethe-A2-Liste geladen<br>Ein Wort gilt erst als <b style="color:var(--success)">gemeistert</b>, wenn du es <b>4×</b> in Folge richtig hattest — „in Arbeit" heißt: du bist dran, aber noch nicht sicher.</div>`;
+  Object.keys(decks).forEach(name=>{
+    const words = decks[name];
+    let mastered=0, learning=0, fresh=0;
+    words.forEach(w=>{
+      const p = progress[w.id];
+      if(!p){ fresh++; }
+      else if(p.box>=4){ mastered++; }
+      else{ learning++; }
+    });
+    const due = words.filter(w=>isDue(w.id)).length;
+    const pct = Math.round(((mastered + learning*0.4)/words.length)*100);
+    html += `
+      <div class="deck-card" onclick="openDeck('${escapeHtml(name)}')">
+        <div>
+          <div class="name">${name}</div>
+          <div class="meta">${mastered} gemeistert · ${learning} in Arbeit · ${fresh} neu</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="stat">
+          <div class="due">${due}</div>
+          <div class="duelabel">fällig</div>
+        </div>
+      </div>`;
+  });
+  main.innerHTML = html;
+}
+
+function escapeHtml(s){ return s.replace(/'/g,"\\'"); }
+
+let browseMode = false;
+
+function openDeck(name){
+  currentDeck = name;
+  browseMode = false;
+  headerTitle.textContent = name.toUpperCase();
+  headerSub.textContent = "";
+  backBtn.style.display = "inline-block";
+  renderDeckTabs();
+}
+
+function renderDeckTabs(){
+  const words = deckList()[currentDeck];
+  let html = `
+    <div class="tabs">
+      <div class="tab ${browseMode?'active':''}" onclick="setMode(true)">📖 Durchsehen</div>
+      <div class="tab ${!browseMode?'active':''}" onclick="setMode(false)">🎴 Karteikarten</div>
+    </div>
+    <div id="deckContent"></div>
+  `;
+  main.innerHTML = html;
+  if(browseMode) renderBrowse(words); else renderSessionStart(words);
+}
+
+function setMode(b){ browseMode=b; renderDeckTabs(); }
+
+function renderBrowse(words){
+  let html = "";
+  words.forEach(w=>{
+    html += `
+      <div class="word-row">
+        <div style="flex:1;">
+          <span class="de">${w.de}</span><span class="type">${w.type}</span>
+          ${w.ex?`<div class="ex">${w.ex}</div>`:""}
+        </div>
+        <div class="en">${w.en}</div>
+      </div>`;
+  });
+  document.getElementById('deckContent').innerHTML = html;
+}
+
+function renderSessionStart(words){
+  const due = words.filter(w=>isDue(w.id));
+  const pool = due.length>0 ? due : words;
+  document.getElementById('deckContent').innerHTML = `
+    <div class="empty-state">
+      <div class="big">🎴</div>
+      <p>${due.length>0 ? due.length+" Karten sind heute fällig." : "Alles wiederholt! Übe die ganze Liste noch mal."}</p>
+      <button class="primary-btn" onclick="startSession()">Start</button>
+    </div>`;
+  window._pool = pool;
+}
+
+function startSession(){
+  session = shuffle([...window._pool]);
+  sessionIdx = 0;
+  sessionStats = {known:0, again:0};
+  renderCard();
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function renderCard(){
+  if(sessionIdx >= session.length){
+    renderSummary();
+    return;
+  }
+  flipped = false;
+  const w = session[sessionIdx];
+  const pct = Math.round((sessionIdx/session.length)*100);
+  document.getElementById('deckContent').innerHTML = `
+    <div class="session-bar">
+      <span>${sessionIdx+1} / ${session.length}</span>
+      <div class="session-progress"><div class="session-progress-fill" style="width:${pct}%"></div></div>
+      <span>✓ ${sessionStats.known}</span>
+    </div>
+    <div class="flip-scene">
+      <div class="flip-card" id="flipCard" onclick="flipCard()">
+        <div class="face front-face">
+          <div class="tag">${w.type}</div>
+          <div class="box-indicator">BOX ${getBox(w.id)}</div>
+          <div class="main-word">${w.de}</div>
+        </div>
+        <div class="face back-face">
+          <div class="main-word">${w.en}</div>
+          ${w.ex?`<div class="example">„${w.ex}“</div>`:""}
+        </div>
+      </div>
+    </div>
+    <div class="hint">Tippe auf die Karte zum Umdrehen</div>
+    <div class="answer-buttons" id="answerButtons" style="visibility:hidden;">
+      <button class="ans-btn ans-again" onclick="answer(false)">✗ Nochmal</button>
+      <button class="ans-btn ans-good" onclick="answer(true)">✓ Kenn ich</button>
+    </div>
+  `;
+}
+
+function flipCard(){
+  flipped = !flipped;
+  document.getElementById('flipCard').classList.toggle('flipped', flipped);
+  if(flipped){
+    document.getElementById('answerButtons').style.visibility = 'visible';
+  }
+}
+
+function answer(correct){
+  const w = session[sessionIdx];
+  markAnswer(w.id, correct);
+  if(correct) sessionStats.known++; else sessionStats.again++;
+  sessionIdx++;
+  renderCard();
+}
+
+function renderSummary(){
+  document.getElementById('deckContent').innerHTML = `
+    <div class="summary">
+      <div class="num mono">${sessionStats.known}/${session.length}</div>
+      <p>richtig gewusst</p>
+      <button class="primary-btn" onclick="renderDeckTabs()">Fertig</button>
+    </div>
+  `;
+}
+
+/* expose for inline handlers */
+window.openDeck = openDeck;
+window.setMode = setMode;
+window.startSession = startSession;
+window.flipCard = flipCard;
+window.answer = answer;
+window.renderDeckTabs = renderDeckTabs;
+
+/* =========================================================
+   INIT
+   ========================================================= */
+(async function init(){
+  await loadProgress();
+  renderHome();
+})();
+</script>
+</body>
+</html>
