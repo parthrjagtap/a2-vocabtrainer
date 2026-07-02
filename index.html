@@ -2,9 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-  
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
 <title>Vokabeltrainer A2</title>
 <style>
   :root{
@@ -2295,14 +2293,24 @@ function storeKey(){
   return "a2-progress";
 }
 
-async function loadProgress(){
-  try{
-    const r = await window.storage.get(storeKey());
-    progress = r ? JSON.parse(r.value) : {};
-  }catch(e){ progress = {}; }
+async function loadProgress() {
+    try {
+        const data = localStorage.getItem(storeKey());
+        progress = data ? JSON.parse(data) : {};
+    } catch (e) {
+        console.error("Load failed:", e);
+        progress = {};
+    }
 }
-async function saveProgress(){
-  try{ await window.storage.set(storeKey(), JSON.stringify(progress)); }catch(e){}
+async function saveProgress() {
+    try {
+        localStorage.setItem(
+            storeKey(),
+            JSON.stringify(progress)
+        );
+    } catch (e) {
+        console.error("Save failed:", e);
+    }
 }
 
 function getBox(id){ return (progress[id] && progress[id].box) || 0; }
