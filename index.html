@@ -93,6 +93,12 @@
   .word-row .en{color:var(--muted); text-align:right; max-width:48%; font-size:0.88rem;}
   .ex{color:var(--muted); font-size:0.75rem; font-style:italic; margin-top:2px;}
 
+  /* sprechen browse rows (question/answer stacked, not side-by-side) */
+  .qa-row{padding:12px 4px; border-bottom:1px solid var(--line);}
+  .qa-row .type{color:var(--amber); font-size:0.68rem; text-transform:uppercase; margin-bottom:4px;}
+  .qa-row .qa-q{font-weight:600; margin-bottom:4px;}
+  .qa-row .qa-a{color:var(--muted); font-size:0.88rem; line-height:1.4;}
+
   /* flashcard */
   .session-bar{
     display:flex; justify-content:space-between; align-items:center;
@@ -141,6 +147,16 @@
   .back-face .example{
     margin-top:14px; font-size:0.85rem; color:var(--muted); font-style:italic; text-align:center; max-width:380px;
   }
+
+  /* sprechen (Q&A) flip-card variant — longer text, left-aligned, scrollable */
+  .flip-card.qa{min-height:290px;}
+  .flip-card.qa .face{align-items:flex-start; justify-content:flex-start; padding:34px 20px 20px; overflow-y:auto;}
+  .flip-card.qa .main-word{
+    font-size:1.15rem; font-weight:700; line-height:1.45; text-align:left;
+    text-transform:none; letter-spacing:normal; font-family:inherit;
+  }
+  .flip-card.qa .back-face .main-word{font-size:1.02rem; font-weight:500; color:var(--flap);}
+
   .hint{text-align:center; color:var(--muted); font-size:0.75rem; margin-bottom:16px;}
 
   .answer-buttons{display:flex; gap:10px;}
@@ -1772,31 +1788,519 @@ const WORDS = [
 ["der Briefkasten","letterbox, mailbox","Bitte den Brief in den Briefkasten werfen."],
 ["der/die Mieter/in","tenant","Die Mieterin wohnt schon fünf Jahre hier."],
 ["ankreuzen","to tick, cross (a box)","Kreuzen Sie die richtige Antwort an."]
-].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Lücken & Ergänzung"}))
+].map(([de,en,ex])=>({de,en,type:"misc",ex,deck:"Lücken & Ergänzung"})),
+
+// ---------- ERGÄNZUNG: SPRECHEN TEIL 1 ----------
+...[
+["der Tagesablauf","daily routine","Wie sieht Ihr Tagesablauf aus?"],
+["die Umwelt","environment","Was tun Sie für die Umwelt?"],
+["die Sprachkenntnisse (Pl.)","language skills","Ich habe gute Sprachkenntnisse in Englisch."],
+["der Traumberuf","dream job","Softwareentwickler ist mein Traumberuf."],
+["die Kindheit","childhood","Ich habe meine Kindheit in Indien verbracht."],
+["die Herkunft","origin","Woher kommt Ihre Herkunft?"],
+["das Heimatland","home country","Mein Heimatland ist Indien."],
+["unterstützen","to support","Meine Eltern unterstützen mich immer."],
+["verbringen","to spend (time)","Wir verbringen gern Zeit miteinander."],
+["sich erinnern (an + Akk.)","to remember","Ich erinnere mich gern an meine Kindheit."],
+["die Erinnerung","memory","Ich habe viele schöne Erinnerungen."],
+["selbstverständlich","of course, self-evident","Das ist für mich selbstverständlich."],
+["hilfsbereit","helpful, willing to help","Meine Nachbarn sind freundlich und hilfsbereit."],
+["die Zukunft","future","Ich freue mich auf die Zukunft."],
+["das Unternehmen","company","Mein Vater arbeitet in einem Unternehmen."],
+["erfolgreich","successful","Ich möchte mein Studium erfolgreich abschließen."],
+["häufig","frequent, common","Ist Ihr Familienname häufig?"],
+["die Region","region","In meiner Region ist der Name bekannt."],
+["sich entspannen","to relax","Am Abend entspanne ich mich."],
+["der Alltag","everyday life, daily life","Das Handy gehört zu meinem Alltag."],
+["der Softwareentwickler / die Softwareentwicklerin","software developer","Ich möchte als Softwareentwickler arbeiten."],
+["das Fitnessstudio","gym","Ich gehe oft ins Fitnessstudio."],
+["die Serie","(TV) series","Ich sehe manchmal eine Serie."],
+["vermissen","to miss (someone/something)","Ich vermisse meine Familie und das Essen."],
+["die Möglichkeit","possibility, option","In der Stadt gibt es mehr Möglichkeiten."]
+].map(([de,en,ex])=>({de,en,type:"n./v.",ex,deck:"Ergänzung: Sprechen Teil 1"})),
 ];
 
 WORDS.forEach((w,i)=>w.id = "w"+i);
+
+/* =========================================================
+   DATA — Goethe A2 Sprechen Teil 1 (Fragen & Antworten)
+   74 Themen, je 2 Fragen mit Musterantworten, gruppiert in 6 Decks
+   ========================================================= */
+const SPRECHEN = [
+// ---------- SPRECHEN TEIL 1: PERSON & FAMILIE ----------
+{de:"Wie alt sind Sie?",en:"Ich bin 22 Jahre alt. Ich komme aus Indien und studiere Informatik. Ich lerne auch Deutsch.",type:"Alter",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Finden Sie Ihr Alter gut?",en:"Ja, ich finde mein Alter gut. Ich bin noch jung und kann viele neue Dinge lernen. Ich freue mich auf die Zukunft.",type:"Alter",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Haben Sie eine große Familie?",en:"Nein, meine Familie ist nicht sehr groß. Ich lebe mit meinen Eltern zusammen. Wir verbringen gern Zeit miteinander.",type:"Familie",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Was machen Sie gern mit Ihrer Familie?",en:"Wir essen zusammen und sprechen über unseren Tag. Am Wochenende sehen wir manchmal einen Film. Das macht uns Spaß.",type:"Familie",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Was machen Ihre Eltern beruflich?",en:"Mein Vater arbeitet in einem Unternehmen. Meine Mutter kümmert sich um die Familie. Sie unterstützen mich immer.",type:"Eltern",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Wie oft verbringen Sie Zeit mit Ihren Eltern?",en:"Ich sehe meine Eltern jeden Tag. Abends essen wir oft zusammen. Danach unterhalten wir uns ein bisschen.",type:"Eltern",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Haben Sie Geschwister?",en:"Ja, ich habe einen Bruder. Wir verstehen uns gut. Manchmal gehen wir zusammen spazieren.",type:"Geschwister",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Was machen Sie gern mit Ihren Geschwistern?",en:"Wir sehen Filme oder spielen Spiele zusammen. Manchmal gehen wir auch essen. Es ist immer lustig.",type:"Geschwister",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Wie viele Freunde haben Sie?",en:"Ich habe einige gute Freunde. Wir kennen uns schon lange. Ich verbringe gern Zeit mit ihnen.",type:"Freunde",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Was machen Sie gern mit Ihren Freunden?",en:"Wir gehen ins Café oder ins Kino. Manchmal spielen wir auch Sport oder unterhalten uns lange. Das gefällt mir.",type:"Freunde",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Wie ist Ihr Familienname?",en:"Mein Familienname ist Jagtap. Viele Menschen in meiner Heimat kennen diesen Namen. Ich mag meinen Familiennamen.",type:"Familienname",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Ist Ihr Familienname häufig?",en:"Ja, in meiner Region ist mein Familienname ziemlich bekannt. In anderen Ländern kennen ihn aber nur wenige Menschen.",type:"Familienname",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Woher kommen Sie?",en:"Ich komme aus Indien. Ich wohne dort mit meiner Familie. Es ist ein großes und interessantes Land.",type:"Herkunft",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Was gefällt Ihnen an Ihrem Heimatland?",en:"Ich mag das leckere Essen und die Kultur. Außerdem sind die Menschen freundlich. Es gibt viele schöne Orte.",type:"Herkunft",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Wie gefällt Ihnen Ihr Heimatland?",en:"Mein Heimatland gefällt mir sehr gut. Es gibt viele verschiedene Kulturen und Sprachen. Das finde ich interessant.",type:"Heimatland",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Was vermissen Sie aus Ihrem Heimatland, wenn Sie reisen?",en:"Ich vermisse meine Familie und das Essen. Außerdem vermisse ich meine Freunde. Deshalb telefoniere ich oft mit ihnen.",type:"Heimatland",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Haben Sie Kinder?",en:"Nein, ich habe keine Kinder. Ich bin noch jung und ledig. Vielleicht möchte ich später Kinder haben.",type:"Kinder",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Mögen Sie Kinder?",en:"Ja, ich mag Kinder. Sie sind oft freundlich und lustig. Ich spiele gern mit meinen kleinen Cousins.",type:"Kinder",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Wo haben Sie Ihre Kindheit verbracht?",en:"Ich habe meine Kindheit in Indien verbracht. Dort bin ich zur Schule gegangen. Ich habe viele schöne Erinnerungen.",type:"Kindheit",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+{de:"Was haben Sie als Kind gern gemacht?",en:"Ich habe gern Fußball gespielt und Fahrrad gefahren. Außerdem habe ich viel Zeit mit meinen Freunden verbracht. Das hat mir viel Spaß gemacht.",type:"Kindheit",ex:"",deck:"Sprechen Teil 1: Person & Familie"},
+// ---------- SPRECHEN TEIL 1: BERUF & AUSBILDUNG ----------
+{de:"Was sind Sie von Beruf?",en:"Ich bin Student. Ich studiere Informatik und interessiere mich für künstliche Intelligenz. Das Studium macht mir Spaß.",type:"Beruf",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Warum gefällt Ihnen Ihr Beruf oder Ihr Studium?",en:"Ich arbeite gern mit Computern und löse Probleme. Ich lerne jeden Tag etwas Neues. Das finde ich interessant.",type:"Beruf",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Was ist Ihr Traumberuf?",en:"Mein Traumberuf ist Softwareentwickler. Ich möchte später an interessanten Projekten arbeiten. Außerdem lerne ich gern neue Technologien.",type:"Traumberuf",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Warum ist das Ihr Traumberuf?",en:"Ich interessiere mich für Computer und Programmieren. Die Arbeit ist abwechslungsreich und spannend. Deshalb gefällt mir dieser Beruf.",type:"Traumberuf",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Welche Ausbildung haben Sie gemacht?",en:"Ich habe Informatik studiert. Während des Studiums habe ich viele praktische Projekte gemacht. Das war sehr hilfreich.",type:"Ausbildung",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Warum haben Sie diese Ausbildung gewählt?",en:"Ich interessiere mich schon lange für Computer. Deshalb habe ich Informatik gewählt. Die Ausbildung gefällt mir sehr.",type:"Ausbildung",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Was studieren Sie?",en:"Ich studiere Informatik. Besonders interessieren mich künstliche Intelligenz und Programmieren. Das Studium ist manchmal schwierig, aber spannend.",type:"Studium",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Warum haben Sie dieses Studium gewählt?",en:"Ich arbeite gern am Computer und löse Probleme. Informatik bietet viele Möglichkeiten für die Zukunft. Deshalb habe ich dieses Studium gewählt.",type:"Studium",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Wer war Ihr Lieblingslehrer?",en:"Mein Lieblingslehrer war mein Mathematiklehrer. Er hat den Unterricht interessant gemacht. Ich habe viel von ihm gelernt.",type:"Lehrer",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Was macht einen guten Lehrer aus?",en:"Ein guter Lehrer erklärt alles ruhig und deutlich. Er hilft den Schülern bei Problemen. Das finde ich wichtig.",type:"Lehrer",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Wie groß ist Ihre Klasse?",en:"Meine Klasse ist nicht sehr groß. Wir sind ungefähr zwanzig Studenten. Wir lernen gut zusammen.",type:"Klasse",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Verstehen Sie sich gut mit Ihren Klassenkameraden?",en:"Ja, wir verstehen uns gut. Wir helfen uns beim Lernen und arbeiten oft zusammen. Das macht das Studium einfacher.",type:"Klasse",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Wann machen Sie normalerweise Ihre Hausaufgaben?",en:"Ich mache meine Hausaufgaben meistens am Abend. Nach dem Lernen ruhe ich mich ein bisschen aus. Danach arbeite ich weiter.",type:"Hausaufgaben",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Machen Sie Hausaufgaben gern?",en:"Nicht immer, aber sie sind wichtig. Ich lerne dadurch besser und kann mich gut auf Prüfungen vorbereiten.",type:"Hausaufgaben",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Wie bereiten Sie sich auf Prüfungen vor?",en:"Ich lerne jeden Tag ein bisschen. Außerdem schreibe ich Notizen und löse Übungen. Das hilft mir sehr.",type:"Prüfung",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Sind Sie vor Prüfungen nervös?",en:"Ja, ein bisschen. Ich versuche aber ruhig zu bleiben und genug zu lernen. Dann fühle ich mich sicherer.",type:"Prüfung",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Warum lernen Sie Deutsch?",en:"Ich lerne Deutsch, weil ich in Deutschland studieren möchte. Die Sprache ist wichtig für den Alltag. Deshalb übe ich jeden Tag.",type:"Deutsch",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Wie lernen Sie Deutsch?",en:"Ich lerne mit Büchern und einer App. Außerdem höre ich Podcasts und spreche Deutsch mit anderen. So verbessere ich meine Sprachkenntnisse.",type:"Deutsch",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Welche Sprachen sprechen Sie?",en:"Ich spreche Marathi, Hindi und Englisch. Außerdem lerne ich Deutsch. Ich möchte mein Deutsch weiter verbessern.",type:"Sprachkenntnisse",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+{de:"Welche Sprache möchten Sie noch lernen?",en:"Im Moment möchte ich mein Deutsch verbessern. Später möchte ich vielleicht auch Französisch lernen. Fremdsprachen finde ich interessant.",type:"Sprachkenntnisse",ex:"",deck:"Sprechen Teil 1: Beruf & Ausbildung"},
+// ---------- SPRECHEN TEIL 1: WOHNEN & ALLTAG ----------
+{de:"Wohnen Sie in einer WG?",en:"Nein, ich wohne in einem Studio. Ich mag es, allein zu leben. Es ist ruhig und ich habe mehr Privatsphäre.",type:"Wohnung",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Wie gefällt Ihnen Ihre Wohnung?",en:"Meine Wohnung gefällt mir sehr gut. Sie ist klein, aber modern und gemütlich. Ich fühle mich dort sehr wohl.",type:"Wohnung",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Wie ist Ihr Zimmer?",en:"Mein Zimmer ist nicht sehr groß, aber ordentlich. Ich habe dort einen Schreibtisch, ein Bett und einen Kleiderschrank. Ich verbringe dort viel Zeit.",type:"Zimmer",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Was machen Sie meistens in Ihrem Zimmer?",en:"Ich lerne, lese oder höre Musik. Manchmal sehe ich auch einen Film. Dort kann ich mich gut entspannen.",type:"Zimmer",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Wie ist Ihre Wohnung eingerichtet?",en:"Meine Wohnung ist einfach eingerichtet. Ich habe ein Sofa, einen Tisch, einen Schreibtisch und ein Bett. Das reicht für mich.",type:"Einrichtung",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Möchten Sie etwas in Ihrer Wohnung ändern?",en:"Ja, ich möchte später einen größeren Schreibtisch kaufen. Außerdem hätte ich gern ein paar Pflanzen. Dann sieht die Wohnung schöner aus.",type:"Einrichtung",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Welche Hausarbeit machen Sie selbst?",en:"Ich putze mein Zimmer, wasche die Kleidung und koche. Das mache ich jede Woche. Es ist wichtig, die Wohnung sauber zu halten.",type:"Haushalt",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Kochen Sie oder putzen Sie lieber?",en:"Ich koche lieber. Es macht mir Spaß, neue Gerichte auszuprobieren. Putzen ist notwendig, aber nicht so interessant.",type:"Haushalt",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Essen Sie lieber zu Hause oder im Restaurant?",en:"Meistens esse ich zu Hause. Das ist günstiger und oft auch gesünder. Am Wochenende gehe ich manchmal ins Restaurant.",type:"Essen",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Kochen Sie gern?",en:"Ja, ich koche gern. Ich mache oft Reis, Gemüse oder Pasta. Kochen macht mir Spaß.",type:"Essen",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Was ist Ihr Lieblingsessen?",en:"Mein Lieblingsessen ist Pizza. Ich esse sie besonders gern mit Gemüse und Käse. Manchmal mache ich sie auch selbst.",type:"Lieblingsessen",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Können Sie Ihr Lieblingsessen kochen?",en:"Ja, ein bisschen. Ich koche gern zu Hause und probiere neue Rezepte aus. Das macht mir Spaß.",type:"Lieblingsessen",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Was essen Sie normalerweise zum Frühstück?",en:"Zum Frühstück esse ich meistens Brot oder Haferflocken. Dazu trinke ich Tee oder Kaffee. Das gibt mir Energie für den Tag.",type:"Frühstück",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Frühstücken Sie jeden Tag?",en:"Ja, fast jeden Tag. Ich finde Frühstück sehr wichtig. Ohne Frühstück habe ich schnell Hunger.",type:"Frühstück",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Haben Sie einen Garten?",en:"Nein, ich habe keinen Garten. Aber ich gehe gern in den Park. Dort kann ich spazieren gehen und mich entspannen.",type:"Garten",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Möchten Sie später einen Garten haben?",en:"Ja, das wäre schön. Ich würde dort Blumen und Gemüse pflanzen. Ein Garten ist ein guter Ort zum Entspannen.",type:"Garten",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Was machen Sie normalerweise am Sonntag?",en:"Am Sonntag schlafe ich etwas länger. Danach treffe ich Freunde oder verbringe Zeit mit meiner Familie. Abends bereite ich mich auf die neue Woche vor.",type:"Sonntag",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Arbeiten oder lernen Sie am Sonntag?",en:"Ja, manchmal lerne ich ein paar Stunden. Danach ruhe ich mich aus oder sehe einen Film. So beginnt die neue Woche besser.",type:"Sonntag",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Wo kaufen Sie normalerweise Kleidung?",en:"Ich kaufe Kleidung meistens in Einkaufszentren oder online. Dort gibt es viele Angebote. Das ist sehr praktisch.",type:"Kleidung",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+{de:"Was tragen Sie gern?",en:"Ich trage am liebsten bequeme Kleidung. Meistens trage ich Jeans und ein T-Shirt. Im Winter trage ich auch eine Jacke.",type:"Kleidung",ex:"",deck:"Sprechen Teil 1: Wohnen & Alltag"},
+// ---------- SPRECHEN TEIL 1: FREIZEIT & REISEN ----------
+{de:"Was ist Ihr Hobby?",en:"Mein Hobby ist Fotografieren. Ich mache gern Fotos von der Natur und von meiner Familie. Das macht mir viel Spaß.",type:"Hobby",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Wann haben Sie Zeit für Ihr Hobby?",en:"Meistens habe ich am Wochenende Zeit. Nach dem Studium bin ich oft beschäftigt. Deshalb mache ich mein Hobby am Samstag oder Sonntag.",type:"Hobby",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Was machen Sie in Ihrer Freizeit?",en:"In meiner Freizeit höre ich Musik, sehe Serien oder treffe Freunde. Manchmal gehe ich auch spazieren. So kann ich mich gut entspannen.",type:"Freizeit",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Haben Sie genug Freizeit?",en:"Ja, meistens schon. Am Wochenende habe ich mehr Zeit als unter der Woche. Dann mache ich Dinge, die mir Spaß machen.",type:"Freizeit",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Machen Sie gern Sport?",en:"Ja, ich mache gern Sport. Ich gehe regelmäßig ins Fitnessstudio. Sport ist wichtig für meine Gesundheit.",type:"Sport",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Wie oft treiben Sie Sport?",en:"Ich trainiere vier- bis fünfmal pro Woche. Nach dem Training fühle ich mich fit und energiegeladen. Deshalb mache ich gern Sport.",type:"Sport",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Welche Musik hören Sie gern?",en:"Ich höre gern Pop und Rock. Manchmal höre ich auch ruhige Musik. Musik hilft mir beim Entspannen.",type:"Musik",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Wann hören Sie Musik?",en:"Ich höre Musik auf dem Weg zur Arbeit oder zum Studium. Außerdem höre ich Musik beim Lernen oder im Fitnessstudio.",type:"Musik",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Sind Sie Mitglied in einem Verein?",en:"Nein, ich bin kein Mitglied in einem Verein. Im Moment habe ich nicht genug Zeit. Vielleicht trete ich später einem Verein bei.",type:"Verein",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Möchten Sie einem Verein beitreten?",en:"Ja, vielleicht einem Sportverein. Dort kann ich Sport machen und neue Leute kennenlernen. Das finde ich interessant.",type:"Verein",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Reisen Sie gern?",en:"Ja, ich reise sehr gern. Ich besuche neue Städte und lerne andere Kulturen kennen. Reisen macht mir viel Spaß.",type:"Reisen",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Wohin möchten Sie gern reisen?",en:"Ich möchte gern durch Deutschland reisen. Besonders interessieren mich Berlin und München. Dort gibt es viele schöne Sehenswürdigkeiten.",type:"Reisen",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Was machen Sie gern im Urlaub?",en:"Im Urlaub erhole ich mich und besuche neue Orte. Ich probiere auch gern neue Gerichte. Das gefällt mir sehr.",type:"Urlaub",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Reisen Sie lieber ans Meer oder in die Berge?",en:"Ich fahre lieber ans Meer. Dort kann ich spazieren gehen und die frische Luft genießen. Das ist sehr entspannend.",type:"Urlaub",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Was machen Sie normalerweise in den Ferien?",en:"In den Ferien ruhe ich mich aus und verbringe Zeit mit meiner Familie. Manchmal mache ich auch eine Reise. So kann ich neue Energie sammeln.",type:"Ferien",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Wohin fahren Sie gern in den Ferien?",en:"Ich fahre gern in eine neue Stadt oder an einen ruhigen Ort. Dort kann ich mich entspannen und die Umgebung entdecken.",type:"Ferien",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Welches Verkehrsmittel benutzen Sie am häufigsten?",en:"Ich benutze meistens den Bus oder die U-Bahn. Das ist günstig und praktisch. Manchmal fahre ich auch mit dem Taxi.",type:"Verkehrsmittel",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Warum benutzen Sie öffentliche Verkehrsmittel?",en:"Sie sind bequem und oft schneller als das Auto. Außerdem muss ich keinen Parkplatz suchen. Das ist sehr praktisch.",type:"Verkehrsmittel",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Fahren Sie gern Fahrrad?",en:"Ja, manchmal fahre ich Fahrrad. Das macht Spaß und ist gut für die Gesundheit. Bei schönem Wetter fahre ich besonders gern.",type:"Fahrrad",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Wann fahren Sie normalerweise Fahrrad?",en:"Meistens fahre ich am Wochenende. Ich fahre im Park oder in meiner Nähe. Das ist eine gute Möglichkeit, aktiv zu bleiben.",type:"Fahrrad",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Haben Sie einen Führerschein?",en:"Ja, ich habe einen Führerschein. Ich fahre aber nicht jeden Tag Auto. Meistens benutze ich öffentliche Verkehrsmittel.",type:"Auto",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Fahren Sie lieber Auto oder Bus?",en:"Meistens fahre ich lieber mit dem Bus. Ich kann dabei lesen oder Musik hören. Das ist entspannter.",type:"Auto",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Fahren Sie gern mit dem Zug?",en:"Ja, ich fahre gern mit dem Zug. Die Reise ist oft bequem und ruhig. Außerdem kann ich aus dem Fenster schauen.",type:"Zug",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+{de:"Wann sind Sie zuletzt mit dem Zug gefahren?",en:"Vor ein paar Wochen bin ich mit dem Zug gefahren. Die Reise war angenehm und pünktlich. Ich war zufrieden.",type:"Zug",ex:"",deck:"Sprechen Teil 1: Freizeit & Reisen"},
+// ---------- SPRECHEN TEIL 1: TECHNIK, GESUNDHEIT & ARBEIT ----------
+{de:"Wofür nutzen Sie das Internet?",en:"Ich nutze das Internet zum Online-Einkaufen, zum Lernen und für soziale Medien. Manchmal sehe ich auch Filme oder Serien. Das Internet ist für mich sehr praktisch.",type:"Internet",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wie oft nutzen Sie das Internet?",en:"Ich nutze das Internet jeden Tag. Ich brauche es für mein Studium und in meiner Freizeit. Ohne das Internet wäre vieles schwieriger.",type:"Internet",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Welche sozialen Medien nutzen Sie?",en:"Ich nutze meistens Instagram und YouTube. Dort sehe ich Videos und bleibe mit meinen Freunden in Kontakt. Ich benutze sie jeden Tag.",type:"Soziale Medien",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wie viel Zeit verbringen Sie in sozialen Medien?",en:"Nicht sehr viel. Meistens verbringe ich etwa eine Stunde pro Tag dort. Ich versuche, meine Zeit sinnvoll zu nutzen.",type:"Soziale Medien",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Telefonieren Sie gern?",en:"Ja, ich telefoniere gern. Meistens rufe ich meine Familie oder meine Freunde an. So bleiben wir in Kontakt.",type:"Telefon",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Mit wem telefonieren Sie am häufigsten?",en:"Am häufigsten telefoniere ich mit meinen Eltern. Wir sprechen über unseren Tag und unsere Pläne. Das gefällt mir.",type:"Telefon",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Welches Wetter mögen Sie am liebsten?",en:"Ich mag sonniges Wetter am liebsten. Dann kann ich spazieren gehen oder Sport machen. Das macht mir gute Laune.",type:"Wetter",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Was machen Sie bei schlechtem Wetter?",en:"Bei schlechtem Wetter bleibe ich meistens zu Hause. Ich lese ein Buch oder sehe eine Serie. So kann ich mich gut entspannen.",type:"Wetter",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Was machen Sie für Ihre Gesundheit?",en:"Ich gehe regelmäßig ins Fitnessstudio und achte auf meine Ernährung. Außerdem versuche ich, genug Wasser zu trinken. Das ist wichtig für mich.",type:"Gesundheit",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Essen Sie gesund?",en:"Ja, meistens schon. Ich esse viel Gemüse und Obst. Fast Food esse ich nur manchmal.",type:"Gesundheit",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Was machen Sie für die Umwelt?",en:"Ich trenne meinen Müll und benutze oft öffentliche Verkehrsmittel. Außerdem versuche ich, Plastik zu sparen. Jeder kann etwas tun.",type:"Umwelt",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Ist Umweltschutz wichtig?",en:"Ja, natürlich. Wir müssen die Natur schützen. Das ist wichtig für unsere Zukunft.",type:"Umwelt",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wie lernen Sie am besten?",en:"Ich lerne am besten in einer ruhigen Umgebung. Ich mache Notizen und wiederhole den Stoff regelmäßig. Das hilft mir sehr.",type:"Lernen",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Lernen Sie lieber allein oder mit anderen?",en:"Meistens lerne ich allein. So kann ich mich besser konzentrieren. Manchmal lerne ich aber auch mit Freunden.",type:"Lernen",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wie kommen Sie zur Arbeit oder zum Studium?",en:"Ich fahre meistens mit dem Bus. Die Fahrt dauert ungefähr dreißig Minuten. Das ist bequem und günstig.",type:"Weg zur Arbeit / zum Studium",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wie lange dauert Ihr Weg?",en:"Mein Weg dauert etwa dreißig Minuten. Ich höre unterwegs oft Musik oder einen Podcast. So vergeht die Zeit schnell.",type:"Weg zur Arbeit / zum Studium",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Ist Aussehen für Sie wichtig?",en:"Ja, aber nicht das Wichtigste. Ich finde, ein freundlicher Charakter ist wichtiger. Trotzdem achte ich auf ein gepflegtes Aussehen.",type:"Aussehen",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Kaufen Sie gern Kleidung?",en:"Ja, manchmal. Ich kaufe lieber bequeme und einfache Kleidung. Qualität ist mir wichtiger als Mode.",type:"Aussehen",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wofür geben Sie Ihr Geld am meisten aus?",en:"Ich gebe mein Geld hauptsächlich für Essen, Kleidung und Bücher aus. Manchmal spare ich auch Geld für Reisen. Das ist mir wichtig.",type:"Lohn / Gehalt",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Ist Geld für Sie wichtig?",en:"Ja, natürlich. Geld ist wichtig für ein gutes Leben. Aber Familie, Gesundheit und Freunde sind für mich wichtiger.",type:"Lohn / Gehalt",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Welche Medien nutzen Sie jeden Tag?",en:"Ich nutze jeden Tag das Internet und soziale Medien. Außerdem lese ich Nachrichten auf meinem Handy. Das gehört zu meinem Alltag.",type:"Medien",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Lesen Sie lieber Nachrichten im Internet oder in der Zeitung?",en:"Ich lese Nachrichten lieber im Internet. Das ist schneller und aktueller. Außerdem kann ich sie überall lesen.",type:"Medien",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wann haben Sie Geburtstag?",en:"Ich habe am 4. August Geburtstag. Normalerweise feiere ich mit meiner Familie. Wir essen zusammen und haben eine schöne Zeit.",type:"Geburtstag",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wie feiern Sie Ihren Geburtstag?",en:"Ich lade meine Familie oder Freunde ein. Wir essen Kuchen und Abendessen. Manchmal bekomme ich auch schöne Geschenke.",type:"Geburtstag",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wann haben Sie Feierabend?",en:"Ich habe um 18 Uhr Feierabend. Danach gehe ich oft ins Fitnessstudio. Am Abend koche ich mir etwas zu essen.",type:"Arbeitszeit",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wie lange arbeiten Sie?",en:"Ich arbeite von 9 bis 17 Uhr. Das sind acht Stunden am Tag. Am Wochenende habe ich frei.",type:"Arbeitszeit",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Wo kaufen Sie normalerweise ein?",en:"Ich kaufe meistens im Supermarkt oder online ein. Das ist praktisch und spart Zeit. Manchmal gehe ich auch ins Einkaufszentrum.",type:"Einkaufen",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Kaufen Sie lieber allein oder mit Freunden ein?",en:"Meistens kaufe ich allein ein. So kann ich schneller entscheiden. Mit Freunden macht Einkaufen aber auch Spaß.",type:"Einkaufen",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Haben Sie bald eine Prüfung?",en:"Ja, ich habe bald eine Deutschprüfung. Deshalb lerne ich jeden Tag. Ich hoffe, dass ich die Prüfung bestehe.",type:"Prüfung",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+{de:"Was machen Sie vor einer Prüfung?",en:"Ich wiederhole meine Notizen und mache Übungen. Am Abend gehe ich früh schlafen. So bin ich am nächsten Tag fit.",type:"Prüfung",ex:"",deck:"Sprechen Teil 1: Technik, Gesundheit & Arbeit"},
+// ---------- SPRECHEN TEIL 1: WOHNORT, STADT & ZUKUNFT ----------
+{de:"Wo wohnen Sie?",en:"Ich wohne in Pune in Indien. Die Stadt ist groß und lebendig. Es gibt viele Einkaufsmöglichkeiten und Restaurants.",type:"Wohnen / Wohnort",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was gefällt Ihnen an Ihrem Wohnort?",en:"Mir gefallen die vielen Cafés und Parks. Außerdem wohnen meine Familie und meine Freunde dort. Deshalb fühle ich mich wohl.",type:"Wohnen / Wohnort",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Reisen Sie lieber allein oder mit anderen?",en:"Ich reise lieber mit Freunden oder meiner Familie. Gemeinsam macht eine Reise mehr Spaß. Wir können viele schöne Erinnerungen sammeln.",type:"Reisen",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was nehmen Sie immer auf eine Reise mit?",en:"Ich nehme immer mein Handy, meinen Reisepass und etwas Kleidung mit. Außerdem vergesse ich nie mein Ladegerät. Das ist für mich wichtig.",type:"Reisen",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Wann haben Sie normalerweise Ferien?",en:"Ich habe meistens im Sommer Ferien. Dann habe ich mehr Zeit für meine Familie und meine Hobbys. Darauf freue ich mich jedes Jahr.",type:"Ferien",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was machen Sie am liebsten in den Ferien?",en:"Ich reise gern oder ruhe mich zu Hause aus. Manchmal treffe ich auch Freunde. So kann ich mich gut erholen.",type:"Ferien",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was machen Sie nach der Arbeit oder nach dem Studium?",en:"Nach der Arbeit gehe ich oft ins Fitnessstudio. Danach esse ich zu Abend und entspanne mich. Manchmal sehe ich auch eine Serie.",type:"Freizeit",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was machen Sie am Wochenende?",en:"Am Wochenende treffe ich Freunde oder verbringe Zeit mit meiner Familie. Außerdem gehe ich manchmal spazieren. Das macht mir Spaß.",type:"Freizeit",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was machen Sie, wenn Sie krank sind?",en:"Ich bleibe zu Hause und ruhe mich aus. Ich trinke viel Wasser und nehme Medikamente, wenn es nötig ist. Danach geht es mir meistens besser.",type:"Gesundheit",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Gehen Sie regelmäßig zum Arzt?",en:"Nur wenn ich krank bin oder eine Untersuchung brauche. Zum Glück bin ich meistens gesund. Deshalb muss ich nicht oft zum Arzt.",type:"Gesundheit",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Benutzen Sie oft einen Computer?",en:"Ja, jeden Tag. Ich benutze den Computer zum Lernen, Arbeiten und Programmieren. Außerdem sehe ich manchmal Filme.",type:"Computer",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was machen Sie am häufigsten am Computer?",en:"Ich programmiere, lerne Deutsch oder suche Informationen im Internet. Manchmal spiele ich auch ein Spiel. Der Computer ist für mich sehr wichtig.",type:"Computer",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Wie oft benutzen Sie Ihr Handy?",en:"Ich benutze mein Handy jeden Tag. Ich telefoniere, schreibe Nachrichten und höre Musik. Es gehört zu meinem Alltag.",type:"Handy",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Können Sie einen Tag ohne Handy leben?",en:"Ja, aber es wäre nicht einfach. Ich brauche mein Handy oft für die Kommunikation und zum Lernen. Trotzdem wäre eine Pause manchmal gut.",type:"Handy",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Wie sieht Ihr Tagesablauf aus?",en:"Ich stehe gegen sieben Uhr auf. Danach frühstücke ich und gehe zur Arbeit oder zum Studium. Am Abend entspanne ich mich oder lerne Deutsch.",type:"Tagesablauf",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was machen Sie am Abend?",en:"Am Abend gehe ich oft ins Fitnessstudio. Danach esse ich zu Abend und sehe manchmal eine Serie. Dann gehe ich schlafen.",type:"Tagesablauf",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was machen Sie normalerweise am Wochenende?",en:"Am Wochenende treffe ich Freunde oder verbringe Zeit mit meiner Familie. Manchmal gehe ich auch ins Kino. So kann ich mich gut erholen.",type:"Wochenende",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Arbeiten Sie am Wochenende?",en:"Nein, normalerweise nicht. Ich nutze das Wochenende zum Ausruhen und für meine Hobbys. Das gefällt mir.",type:"Wochenende",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Gehen Sie gern ins Kino?",en:"Ja, ich gehe gern ins Kino. Ich sehe besonders gern Actionfilme und Komödien. Das macht mir Spaß.",type:"Kino",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Mit wem gehen Sie ins Kino?",en:"Meistens gehe ich mit Freunden ins Kino. Danach essen wir oft noch etwas zusammen. Das ist immer schön.",type:"Kino",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Lesen Sie gern Bücher?",en:"Ja, ich lese gern. Besonders interessieren mich Bücher über Technologie und Romane. Lesen entspannt mich.",type:"Bücher",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Wann lesen Sie?",en:"Ich lese meistens am Abend oder am Wochenende. Dann habe ich mehr Zeit. Das gefällt mir.",type:"Bücher",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Gehen Sie gern ins Café?",en:"Ja, manchmal. Ich trinke dort gern Kaffee oder Tee. Außerdem treffe ich dort oft Freunde.",type:"Café",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was bestellen Sie im Café?",en:"Meistens bestelle ich einen Kaffee und einen kleinen Kuchen. Manchmal nehme ich auch ein Sandwich. Das schmeckt gut.",type:"Café",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Gehen Sie oft ins Restaurant?",en:"Nicht sehr oft. Meistens esse ich zu Hause. Am Wochenende gehe ich manchmal mit meiner Familie ins Restaurant.",type:"Restaurant",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Welches Essen bestellen Sie gern?",en:"Ich bestelle gern Pizza oder Pasta. Manchmal probiere ich auch neue Gerichte. Das macht Spaß.",type:"Restaurant",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Kennen Sie Ihre Nachbarn?",en:"Ja, ich kenne einige Nachbarn. Sie sind freundlich und hilfsbereit. Manchmal sprechen wir miteinander.",type:"Nachbarn",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Helfen Sie Ihren Nachbarn?",en:"Ja, wenn sie Hilfe brauchen. Zum Beispiel nehme ich Pakete an oder helfe beim Tragen. Das ist für mich selbstverständlich.",type:"Nachbarn",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Schenken Sie gern Geschenke?",en:"Ja, sehr gern. Ich freue mich, wenn andere glücklich sind. Deshalb mache ich gern kleine Geschenke.",type:"Geschenk",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was schenken Sie Ihren Freunden?",en:"Ich schenke oft Bücher, Schokolade oder Blumen. Das sind schöne und einfache Geschenke. Meine Freunde freuen sich darüber.",type:"Geschenk",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Leben Sie lieber in einer Stadt oder auf dem Land?",en:"Ich lebe lieber in einer Stadt. Dort gibt es mehr Möglichkeiten zum Arbeiten und Lernen. Außerdem ist alles gut erreichbar.",type:"Stadt",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was gefällt Ihnen an Ihrer Stadt?",en:"Es gibt viele Restaurants, Parks und Geschäfte. Außerdem sind die öffentlichen Verkehrsmittel gut. Deshalb wohne ich gern dort.",type:"Stadt",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Was möchten Sie in Zukunft machen?",en:"Ich möchte mein Studium erfolgreich abschließen. Danach möchte ich als Softwareentwickler arbeiten. Das ist mein Ziel.",type:"Zukunft",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+{de:"Möchten Sie später im Ausland leben?",en:"Ja, vielleicht. Ich möchte gern einige Jahre in Deutschland leben und arbeiten. Das wäre eine gute Erfahrung.",type:"Zukunft",ex:"",deck:"Sprechen Teil 1: Wohnort, Stadt & Zukunft"},
+];
+
+SPRECHEN.forEach((c,i)=>c.id = "s"+i);
+
+/* =========================================================
+   DATA — Goethe A2 Sprechen Teil 2 (Von sich erzählen)
+   Redemittel, Zeitausdrücke, Verben, Adjektive, goldene Sätze,
+   Satzmuster & Beispiel-Monologe — gruppiert in 11 Decks
+   ========================================================= */
+const SPRECHEN2 = [
+// ---------- SPRECHEN TEIL 2: EINLEITUNG, MEINUNG & SCHLUSS ----------
+{de:"Für mich...",en:"For me...",type:"Einleitung",ex:"Für mich ist Familie das Wichtigste im Leben.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Meiner Meinung nach...",en:"In my opinion...",type:"Einleitung",ex:"Meiner Meinung nach ist Deutsch lernen nicht so schwer.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Ich denke, dass...",en:"I think that...",type:"Einleitung",ex:"Ich denke, dass Sport sehr wichtig für die Gesundheit ist.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Ich glaube, dass...",en:"I believe that...",type:"Einleitung",ex:"Ich glaube, dass ich mein Ziel bald erreiche.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Meistens...",en:"Mostly, usually...",type:"Einleitung",ex:"Meistens stehe ich um sieben Uhr auf.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Normalerweise...",en:"Normally...",type:"Einleitung",ex:"Normalerweise gehe ich zu Fuß zur Arbeit.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"In meiner Freizeit...",en:"In my free time...",type:"Einleitung",ex:"In meiner Freizeit spiele ich Harmonika.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Jeden Tag...",en:"Every day...",type:"Einleitung",ex:"Jeden Tag lerne ich eine Stunde Deutsch.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Am Wochenende...",en:"On the weekend...",type:"Einleitung",ex:"Am Wochenende treffe ich meine Freunde.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Im Urlaub...",en:"On vacation...",type:"Einleitung",ex:"Im Urlaub möchte ich nach Deutschland reisen.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Wenn ich Zeit habe,...",en:"When/if I have time,...",type:"Einleitung",ex:"Wenn ich Zeit habe, gehe ich ins Fitnessstudio.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Wenn das Wetter schön ist,...",en:"If the weather is nice,...",type:"Einleitung",ex:"Wenn das Wetter schön ist, fahre ich Fahrrad.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Ich finde...",en:"I think / I find...",type:"Meinung äußern",ex:"Ich finde, Deutsch ist eine schöne Sprache.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Ich denke...",en:"I think...",type:"Meinung äußern",ex:"Ich denke, das ist eine gute Idee.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Ich glaube...",en:"I believe...",type:"Meinung äußern",ex:"Ich glaube, das Studium wird mir gut gefallen.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Für mich ist ... wichtig.",en:"... is important to me.",type:"Meinung äußern",ex:"Für mich ist meine Familie sehr wichtig.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das gefällt mir.",en:"I like that.",type:"Meinung äußern",ex:"Die neue Wohnung gefällt mir.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das gefällt mir sehr.",en:"I like that a lot.",type:"Meinung äußern",ex:"Das Wetter heute gefällt mir sehr.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das macht mir Spaß.",en:"That's fun for me.",type:"Meinung äußern",ex:"Fußball spielen macht mir Spaß.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das finde ich interessant.",en:"I find that interesting.",type:"Meinung äußern",ex:"Künstliche Intelligenz finde ich interessant.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das finde ich praktisch.",en:"I find that practical.",type:"Meinung äußern",ex:"Ein Fahrrad in der Stadt finde ich praktisch.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das ist eine gute Idee.",en:"That's a good idea.",type:"Meinung äußern",ex:"Zusammen zu lernen ist eine gute Idee.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das ist gut für mich.",en:"That's good for me.",type:"Meinung äußern",ex:"Regelmäßiger Sport ist gut für mich.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Ich genieße das.",en:"I enjoy that.",type:"Meinung äußern",ex:"Ich genieße die Ruhe am Abend.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Ich bin damit zufrieden.",en:"I'm satisfied with that.",type:"Meinung äußern",ex:"Mit meinen Deutschkenntnissen bin ich zufrieden.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Zum Schluss...",en:"Finally, in conclusion...",type:"Schluss",ex:"Zum Schluss möchte ich noch sagen, dass ich glücklich bin.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Insgesamt...",en:"Overall...",type:"Schluss",ex:"Insgesamt war das Jahr sehr erfolgreich für mich.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Am Ende...",en:"In the end...",type:"Schluss",ex:"Am Ende habe ich mein Ziel erreicht.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Ich hoffe, dass...",en:"I hope that...",type:"Schluss",ex:"Ich hoffe, dass ich die Prüfung bestehe.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das macht mich glücklich.",en:"That makes me happy.",type:"Schluss",ex:"Zeit mit meiner Familie macht mich glücklich.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+{de:"Das ist für mich wichtig.",en:"That's important to me.",type:"Schluss",ex:"Gesunde Ernährung ist für mich wichtig.",deck:"Sprechen Teil 2: Einleitung, Meinung & Schluss"},
+// ---------- SPRECHEN TEIL 2: VERBINDEN, BEGRÜNDEN & BEISPIELE ----------
+{de:"auch",en:"also, too",type:"Hinzufügen",ex:"Ich spiele auch gern Fußball.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"außerdem",en:"furthermore, besides",type:"Hinzufügen",ex:"Ich lerne Deutsch, außerdem lerne ich Japanisch.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"dazu",en:"in addition to that",type:"Hinzufügen",ex:"Ich esse gern Pizza, und dazu trinke ich Cola.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"nicht nur..., sondern auch...",en:"not only..., but also...",type:"Hinzufügen",ex:"Ich lerne nicht nur Deutsch, sondern auch Japanisch.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"dann",en:"then",type:"Hinzufügen",ex:"Zuerst frühstücke ich, dann gehe ich zur Arbeit.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"danach",en:"after that",type:"Hinzufügen",ex:"Ich lerne eine Stunde, danach mache ich Sport.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"weil...",en:"because...",type:"Begründen",ex:"Ich lerne Deutsch, weil ich in Stuttgart studieren möchte.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"denn...",en:"because, for...",type:"Begründen",ex:"Ich bin müde, denn ich habe wenig geschlafen.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"deshalb...",en:"therefore, that's why...",type:"Begründen",ex:"Es regnet, deshalb bleibe ich zu Hause.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"darum...",en:"that's why, therefore...",type:"Begründen",ex:"Ich habe keine Zeit, darum kann ich nicht kommen.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"aus diesem Grund...",en:"for this reason...",type:"Begründen",ex:"Ich möchte in Deutschland arbeiten, aus diesem Grund lerne ich Deutsch.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"zum Beispiel...",en:"for example...",type:"Beispiele geben",ex:"Ich mag Sport, zum Beispiel Fußball und Schwimmen.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"beispielsweise...",en:"for instance...",type:"Beispiele geben",ex:"Viele Städte, beispielsweise Berlin und München, sind sehr interessant.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"ein Beispiel ist...",en:"one example is...",type:"Beispiele geben",ex:"Ein Beispiel ist mein Bruder, er lernt auch Deutsch.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"letztes Jahr zum Beispiel...",en:"last year, for example...",type:"Beispiele geben",ex:"Letztes Jahr zum Beispiel bin ich nach Goa gefahren.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"aber...",en:"but...",type:"Kontrast",ex:"Ich möchte reisen, aber ich habe wenig Geld.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"leider...",en:"unfortunately...",type:"Kontrast",ex:"Leider habe ich heute keine Zeit.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"trotzdem...",en:"nevertheless, still...",type:"Kontrast",ex:"Es regnet, trotzdem gehe ich spazieren.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+{de:"auf der anderen Seite...",en:"on the other hand...",type:"Kontrast",ex:"Die Stadt ist teuer, auf der anderen Seite gibt es viele Möglichkeiten.",deck:"Sprechen Teil 2: Verbinden, Begründen & Beispiele"},
+// ---------- SPRECHEN TEIL 2: ZEITAUSDRÜCKE ----------
+{de:"zuerst",en:"first, at first",type:"Vorher",ex:"Zuerst dusche ich, dann frühstücke ich.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"zuerst einmal",en:"first of all",type:"Vorher",ex:"Zuerst einmal möchte ich mich vorstellen.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"am Anfang",en:"at the beginning",type:"Vorher",ex:"Am Anfang war Deutsch für mich schwer.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"davor",en:"before that",type:"Vorher",ex:"Davor habe ich in Pune gewohnt.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"vorher",en:"beforehand, before",type:"Vorher",ex:"Vorher habe ich als Berater gearbeitet.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"vor...",en:"before... (e.g. vor einem Jahr)",type:"Vorher",ex:"Vor einem Jahr habe ich mit Deutsch angefangen.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"während",en:"during, while",type:"Währenddessen",ex:"Während des Studiums habe ich viel gelernt.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"dabei",en:"while doing that, in doing so",type:"Währenddessen",ex:"Ich höre Musik und tanze dabei.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"gleichzeitig",en:"at the same time",type:"Währenddessen",ex:"Ich lerne Deutsch und Japanisch gleichzeitig.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"in dieser Zeit",en:"during this time",type:"Währenddessen",ex:"In dieser Zeit habe ich viele neue Freunde gefunden.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"dann",en:"then",type:"Danach",ex:"Ich esse, dann gehe ich schlafen.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"danach",en:"after that",type:"Danach",ex:"Ich lerne, danach spiele ich Harmonika.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"anschließend",en:"afterwards, subsequently",type:"Danach",ex:"Ich dusche, anschließend frühstücke ich.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"später",en:"later",type:"Danach",ex:"Später möchte ich in Deutschland leben.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"nachher",en:"afterward, later",type:"Danach",ex:"Nachher gehe ich noch einkaufen.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"am Ende",en:"at the end",type:"Danach",ex:"Am Ende war ich sehr zufrieden.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"zum Schluss",en:"finally, in conclusion",type:"Danach",ex:"Zum Schluss sehe ich noch eine Serie.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"schließlich",en:"finally, eventually",type:"Danach",ex:"Schließlich habe ich die Prüfung bestanden.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"heute",en:"today",type:"Gegenwart",ex:"Heute lerne ich für die Prüfung.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"jetzt",en:"now",type:"Gegenwart",ex:"Jetzt wohne ich in Pune.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"im Moment",en:"at the moment",type:"Gegenwart",ex:"Im Moment arbeite ich als Berater.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"momentan",en:"currently",type:"Gegenwart",ex:"Momentan lerne ich viel Deutsch.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"heutzutage",en:"nowadays",type:"Gegenwart",ex:"Heutzutage nutzen viele Menschen KI.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"zurzeit",en:"currently, at present",type:"Gegenwart",ex:"Zurzeit bereite ich mich auf mein Studium vor.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"morgen",en:"tomorrow",type:"Zukunft",ex:"Morgen habe ich eine Deutschprüfung.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"bald",en:"soon",type:"Zukunft",ex:"Bald ziehe ich nach Stuttgart.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"später",en:"later",type:"Zukunft",ex:"Später möchte ich als Ingenieur arbeiten.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"nächstes Jahr",en:"next year",type:"Zukunft",ex:"Nächstes Jahr beginne ich mein Studium.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"in Zukunft",en:"in the future",type:"Zukunft",ex:"In Zukunft möchte ich im Ausland leben.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"irgendwann",en:"sometime, someday",type:"Zukunft",ex:"Irgendwann möchte ich ein eigenes Unternehmen haben.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"gestern",en:"yesterday",type:"Vergangenheit",ex:"Gestern habe ich Deutsch gelernt.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"letzte Woche",en:"last week",type:"Vergangenheit",ex:"Letzte Woche habe ich meine Familie besucht.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"letztes Jahr",en:"last year",type:"Vergangenheit",ex:"Letztes Jahr habe ich mein Studium abgeschlossen.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"früher",en:"earlier, in the past, formerly",type:"Vergangenheit",ex:"Früher habe ich in Pune gewohnt.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"damals",en:"back then, at that time",type:"Vergangenheit",ex:"Damals war ich noch Student.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"vor einem Jahr",en:"a year ago",type:"Vergangenheit",ex:"Vor einem Jahr habe ich mit Deutsch angefangen.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"Am Sonntag...",en:"On Sunday...",type:"Tageszeit & Jahreszeit",ex:"Am Sonntag schlafe ich meistens lange.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"Morgens...",en:"In the mornings...",type:"Tageszeit & Jahreszeit",ex:"Morgens trinke ich immer Kaffee.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"Mittags...",en:"At midday...",type:"Tageszeit & Jahreszeit",ex:"Mittags esse ich meistens etwas Kleines.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"Abends...",en:"In the evenings...",type:"Tageszeit & Jahreszeit",ex:"Abends lerne ich oft Deutsch.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"Nach der Arbeit...",en:"After work...",type:"Tageszeit & Jahreszeit",ex:"Nach der Arbeit gehe ich ins Fitnessstudio.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"Im Sommer...",en:"In summer...",type:"Tageszeit & Jahreszeit",ex:"Im Sommer fahre ich gern Fahrrad.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+{de:"Im Winter...",en:"In winter...",type:"Tageszeit & Jahreszeit",ex:"Im Winter bleibe ich lieber zu Hause.",deck:"Sprechen Teil 2: Zeitausdrücke"},
+// ---------- SPRECHEN TEIL 2: HÄUFIGKEIT ----------
+{de:"immer",en:"always",type:"Häufigkeit",ex:"Ich trinke immer Kaffee am Morgen.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"fast immer",en:"almost always",type:"Häufigkeit",ex:"Ich bin fast immer pünktlich.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"meistens",en:"mostly, usually",type:"Häufigkeit",ex:"Meistens lerne ich abends Deutsch.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"normalerweise",en:"normally",type:"Häufigkeit",ex:"Normalerweise stehe ich früh auf.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"oft",en:"often",type:"Häufigkeit",ex:"Ich gehe oft ins Fitnessstudio.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"häufig",en:"frequently",type:"Häufigkeit",ex:"Ich spiele häufig Harmonika.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"manchmal",en:"sometimes",type:"Häufigkeit",ex:"Manchmal koche ich indisches Essen.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"ab und zu",en:"now and then",type:"Häufigkeit",ex:"Ab und zu gehe ich ins Kino.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"selten",en:"rarely",type:"Häufigkeit",ex:"Ich esse selten Fast Food.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"fast nie",en:"almost never",type:"Häufigkeit",ex:"Ich bin fast nie krank.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"nie",en:"never",type:"Häufigkeit",ex:"Ich rauche nie.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"jeden Tag",en:"every day",type:"Häufigkeit",ex:"Ich lerne jeden Tag Deutsch.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"jede Woche",en:"every week",type:"Häufigkeit",ex:"Jede Woche treffe ich meine Freunde.",deck:"Sprechen Teil 2: Häufigkeit"},
+{de:"jedes Jahr",en:"every year",type:"Häufigkeit",ex:"Jedes Jahr besuche ich meine Familie.",deck:"Sprechen Teil 2: Häufigkeit"},
+// ---------- SPRECHEN TEIL 2: ORTE & PERSONEN ----------
+{de:"zu Hause",en:"at home",type:"Orte",ex:"Am Wochenende bin ich meistens zu Hause.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"im Park",en:"in the park",type:"Orte",ex:"Im Park gehe ich gern spazieren.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"im Restaurant",en:"at the restaurant",type:"Orte",ex:"Im Restaurant esse ich gern Pizza.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"im Kino",en:"at the cinema",type:"Orte",ex:"Im Kino sehe ich gern Actionfilme.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"im Fitnessstudio",en:"at the gym",type:"Orte",ex:"Im Fitnessstudio trainiere ich dreimal pro Woche.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"im Büro",en:"at the office",type:"Orte",ex:"Im Büro arbeite ich am Computer.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"an der Universität",en:"at the university",type:"Orte",ex:"An der Universität studiere ich Informatik.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"in der Stadt",en:"in the city",type:"Orte",ex:"In der Stadt gibt es viele Restaurants.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"auf dem Land",en:"in the countryside",type:"Orte",ex:"Auf dem Land ist es sehr ruhig.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"im Ausland",en:"abroad",type:"Orte",ex:"Im Ausland möchte ich studieren.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"allein",en:"alone",type:"Personen",ex:"Am Wochenende bin ich gern allein.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"zusammen",en:"together",type:"Personen",ex:"Wir lernen zusammen Deutsch.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"mit meiner Familie",en:"with my family",type:"Personen",ex:"Mit meiner Familie esse ich jeden Abend.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"mit meinen Freunden",en:"with my friends",type:"Personen",ex:"Mit meinen Freunden gehe ich ins Kino.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"mit meinen Eltern",en:"with my parents",type:"Personen",ex:"Mit meinen Eltern lebe ich zusammen.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"mit meinen Kollegen",en:"with my colleagues",type:"Personen",ex:"Mit meinen Kollegen arbeite ich im Büro.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"mit meinem Bruder",en:"with my brother",type:"Personen",ex:"Mit meinem Bruder spiele ich oft Fußball.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"mit meiner Schwester",en:"with my sister",type:"Personen",ex:"Mit meiner Schwester telefoniere ich oft.",deck:"Sprechen Teil 2: Orte & Personen"},
+{de:"mit meinem Partner / meiner Partnerin",en:"with my partner",type:"Personen",ex:"Mit meinem Partner plane ich eine Reise.",deck:"Sprechen Teil 2: Orte & Personen"},
+// ---------- SPRECHEN TEIL 2: PLÄNE, VERGANGENHEIT & GEFÜHLE ----------
+{de:"Ich möchte...",en:"I would like to...",type:"Zukunftspläne",ex:"Ich möchte in Stuttgart studieren.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Ich will...",en:"I want to...",type:"Zukunftspläne",ex:"Ich will meine Deutschkenntnisse verbessern.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Ich plane...",en:"I'm planning to...",type:"Zukunftspläne",ex:"Ich plane, im September nach Deutschland zu ziehen.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Ich hoffe...",en:"I hope...",type:"Zukunftspläne",ex:"Ich hoffe, die Prüfung zu bestehen.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Mein Traum ist...",en:"My dream is...",type:"Zukunftspläne",ex:"Mein Traum ist, als KI-Ingenieur zu arbeiten.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Später möchte ich...",en:"Later I would like to...",type:"Zukunftspläne",ex:"Später möchte ich mein eigenes Unternehmen gründen.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Bald möchte ich...",en:"Soon I would like to...",type:"Zukunftspläne",ex:"Bald möchte ich nach Deutschland reisen.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"In Zukunft möchte ich...",en:"In the future I would like to...",type:"Zukunftspläne",ex:"In Zukunft möchte ich im Ausland leben.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Ich habe...",en:"I have... (Perfekt with haben)",type:"Vergangenheit",ex:"Ich habe letztes Jahr mein Studium abgeschlossen.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Ich bin...",en:"I am/was... (Perfekt with sein)",type:"Vergangenheit",ex:"Ich bin letztes Jahr nach Pune gezogen.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Früher...",en:"In the past.../formerly...",type:"Vergangenheit",ex:"Früher habe ich als Berater gearbeitet.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Letztes Jahr...",en:"Last year...",type:"Vergangenheit",ex:"Letztes Jahr habe ich viel Deutsch gelernt.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Als Kind...",en:"As a child...",type:"Vergangenheit",ex:"Als Kind habe ich gern Fußball gespielt.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Vor zwei Jahren...",en:"Two years ago...",type:"Vergangenheit",ex:"Vor zwei Jahren habe ich mein Studium begonnen.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Ich freue mich.",en:"I'm happy / looking forward to it.",type:"Gefühle",ex:"Ich freue mich auf mein Studium in Deutschland.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Ich bin glücklich.",en:"I am happy.",type:"Gefühle",ex:"Ich bin glücklich, wenn ich Musik höre.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Ich bin zufrieden.",en:"I am satisfied.",type:"Gefühle",ex:"Ich bin zufrieden mit meinem Leben.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Das macht Spaß.",en:"That's fun.",type:"Gefühle",ex:"Harmonika spielen macht Spaß.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Das gefällt mir.",en:"I like that.",type:"Gefühle",ex:"Meine neue Wohnung gefällt mir.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Das gefällt mir sehr.",en:"I like that a lot.",type:"Gefühle",ex:"Das deutsche Essen gefällt mir sehr.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Das ist toll.",en:"That's great.",type:"Gefühle",ex:"Deine Idee ist toll.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+{de:"Das finde ich super.",en:"I think that's awesome.",type:"Gefühle",ex:"Das Wetter heute finde ich super.",deck:"Sprechen Teil 2: Pläne, Vergangenheit & Gefühle"},
+// ---------- SPRECHEN TEIL 2: VERBEN NACH THEMEN ----------
+{de:"spielen",en:"to play",type:"Freizeit",ex:"Ich spiele gern Harmonika.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"treffen",en:"to meet",type:"Freizeit",ex:"Ich treffe meine Freunde im Park.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"besuchen",en:"to visit",type:"Freizeit",ex:"Ich besuche meine Familie am Wochenende.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"reisen",en:"to travel",type:"Freizeit",ex:"Ich reise gern nach Europa.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"wandern",en:"to hike",type:"Freizeit",ex:"Im Sommer wandere ich gern in den Bergen.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"schwimmen",en:"to swim",type:"Freizeit",ex:"Ich schwimme gern im Sommer.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"tanzen",en:"to dance",type:"Freizeit",ex:"Meine Schwester tanzt sehr gut.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"fotografieren",en:"to photograph",type:"Freizeit",ex:"Ich fotografiere gern die Natur.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"kochen",en:"to cook",type:"Freizeit",ex:"Am Wochenende koche ich gern indisches Essen.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"lesen",en:"to read",type:"Freizeit",ex:"Ich lese gern Manga.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"fernsehen",en:"to watch TV",type:"Freizeit",ex:"Abends sehe ich gern fern.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"Musik hören",en:"to listen to music",type:"Freizeit",ex:"Ich höre gern deutsche Musik.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"lernen",en:"to learn, study",type:"Arbeit/Studium",ex:"Ich lerne jeden Tag Deutsch.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"studieren",en:"to study (at university)",type:"Arbeit/Studium",ex:"Ich studiere Informatik.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"arbeiten",en:"to work",type:"Arbeit/Studium",ex:"Ich arbeite als Berater bei PRAJ Investment.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"schreiben",en:"to write",type:"Arbeit/Studium",ex:"Ich schreibe gern E-Mails auf Deutsch.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"üben",en:"to practice",type:"Arbeit/Studium",ex:"Ich übe jeden Tag Deutsch sprechen.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"machen",en:"to do, make",type:"Arbeit/Studium",ex:"Ich mache viele Übungen für die Prüfung.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"helfen",en:"to help",type:"Arbeit/Studium",ex:"Ich helfe meinen Kunden bei Investitionen.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"putzen",en:"to clean",type:"Zuhause",ex:"Am Samstag putze ich die Wohnung.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"aufräumen",en:"to tidy up",type:"Zuhause",ex:"Ich räume mein Zimmer jede Woche auf.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"waschen",en:"to wash",type:"Zuhause",ex:"Ich wasche meine Kleidung selbst.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"schlafen",en:"to sleep",type:"Zuhause",ex:"Ich schlafe meistens sieben Stunden.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"essen",en:"to eat",type:"Zuhause",ex:"Ich esse gern indisches Essen.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"trinken",en:"to drink",type:"Zuhause",ex:"Ich trinke jeden Morgen Kaffee.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"fahren",en:"to drive, to go (by vehicle)",type:"Reisen",ex:"Ich fahre mit dem Zug zur Arbeit.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"fliegen",en:"to fly",type:"Reisen",ex:"Ich möchte nach Deutschland fliegen.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"übernachten",en:"to stay overnight",type:"Reisen",ex:"Wir haben in einem Hotel übernachtet.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"ankommen",en:"to arrive",type:"Reisen",ex:"Der Zug kommt um neun Uhr an.",deck:"Sprechen Teil 2: Verben nach Themen"},
+{de:"abfahren",en:"to depart",type:"Reisen",ex:"Der Bus fährt um acht Uhr ab.",deck:"Sprechen Teil 2: Verben nach Themen"},
+// ---------- SPRECHEN TEIL 2: ADJEKTIVE ----------
+{de:"gut",en:"good",type:"Adjektiv",ex:"Das Essen schmeckt gut.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"schön",en:"nice, beautiful",type:"Adjektiv",ex:"Stuttgart soll eine schöne Stadt sein.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"interessant",en:"interesting",type:"Adjektiv",ex:"Künstliche Intelligenz ist ein interessantes Thema.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"wichtig",en:"important",type:"Adjektiv",ex:"Familie ist mir sehr wichtig.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"lustig",en:"funny",type:"Adjektiv",ex:"Mein Bruder ist sehr lustig.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"praktisch",en:"practical",type:"Adjektiv",ex:"Ein Fahrrad ist in der Stadt sehr praktisch.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"bequem",en:"comfortable",type:"Adjektiv",ex:"Der Sessel ist sehr bequem.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"gesund",en:"healthy",type:"Adjektiv",ex:"Ich esse gern gesundes Essen.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"teuer",en:"expensive",type:"Adjektiv",ex:"Wohnungen in Stuttgart sind ziemlich teuer.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"billig",en:"cheap",type:"Adjektiv",ex:"Der Kaffee hier ist billig.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"neu",en:"new",type:"Adjektiv",ex:"Ich habe eine neue Wohnung gefunden.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"alt",en:"old",type:"Adjektiv",ex:"Mein Auto ist schon zehn Jahre alt.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"ruhig",en:"calm, quiet",type:"Adjektiv",ex:"Auf dem Land ist es sehr ruhig.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"laut",en:"loud",type:"Adjektiv",ex:"Die Stadt ist manchmal sehr laut.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"lecker",en:"tasty, delicious",type:"Adjektiv",ex:"Das Essen im Restaurant war sehr lecker.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"groß",en:"big, large",type:"Adjektiv",ex:"Meine Familie ist nicht sehr groß.",deck:"Sprechen Teil 2: Adjektive"},
+{de:"klein",en:"small",type:"Adjektiv",ex:"Ich wohne in einer kleinen Wohnung.",deck:"Sprechen Teil 2: Adjektive"},
+// ---------- SPRECHEN TEIL 2: 50 GOLDENE SÄTZE ----------
+{de:"Ich habe letztes Jahr...",en:"Last year I...",type:"Satz 1/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich möchte später...",en:"Later I would like to...",type:"Satz 2/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich plane...",en:"I'm planning...",type:"Satz 3/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich hoffe, dass...",en:"I hope that...",type:"Satz 4/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Für mich ist ... wichtig.",en:"... is important to me.",type:"Satz 5/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich finde das interessant.",en:"I find that interesting.",type:"Satz 6/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Das gefällt mir sehr.",en:"I like that a lot.",type:"Satz 7/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Das macht mir Spaß.",en:"That's fun for me.",type:"Satz 8/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"In meiner Freizeit...",en:"In my free time...",type:"Satz 9/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Am Wochenende...",en:"On the weekend...",type:"Satz 10/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Im Urlaub...",en:"On vacation...",type:"Satz 11/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Jeden Tag...",en:"Every day...",type:"Satz 12/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Meistens...",en:"Mostly, usually...",type:"Satz 13/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Normalerweise...",en:"Normally...",type:"Satz 14/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Manchmal...",en:"Sometimes...",type:"Satz 15/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Oft...",en:"Often...",type:"Satz 16/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Danach...",en:"After that...",type:"Satz 17/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Außerdem...",en:"Furthermore...",type:"Satz 18/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Deshalb...",en:"Therefore...",type:"Satz 19/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Weil...",en:"Because...",type:"Satz 20/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Zum Beispiel...",en:"For example...",type:"Satz 21/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Mit meiner Familie...",en:"With my family...",type:"Satz 22/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Mit meinen Freunden...",en:"With my friends...",type:"Satz 23/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Zu Hause...",en:"At home...",type:"Satz 24/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Im Park...",en:"In the park...",type:"Satz 25/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Im Restaurant...",en:"At the restaurant...",type:"Satz 26/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Im Kino...",en:"At the cinema...",type:"Satz 27/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich lerne...",en:"I learn/study...",type:"Satz 28/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich arbeite...",en:"I work...",type:"Satz 29/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich spiele...",en:"I play...",type:"Satz 30/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich fahre...",en:"I drive/go...",type:"Satz 31/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich esse...",en:"I eat...",type:"Satz 32/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich trinke...",en:"I drink...",type:"Satz 33/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich kaufe...",en:"I buy...",type:"Satz 34/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich lese...",en:"I read...",type:"Satz 35/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich sehe gern Filme.",en:"I like watching movies.",type:"Satz 36/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich höre gern Musik.",en:"I like listening to music.",type:"Satz 37/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich verbringe gern Zeit mit...",en:"I like spending time with...",type:"Satz 38/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich interessiere mich für...",en:"I'm interested in...",type:"Satz 39/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Das ist gut für meine Gesundheit.",en:"That's good for my health.",type:"Satz 40/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Das ist praktisch.",en:"That's practical.",type:"Satz 41/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Das ist nicht so einfach.",en:"That's not so easy.",type:"Satz 42/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Wenn ich Zeit habe,...",en:"When I have time,...",type:"Satz 43/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Wenn das Wetter schön ist,...",en:"If the weather is nice,...",type:"Satz 44/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Bald möchte ich...",en:"Soon I would like to...",type:"Satz 45/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Später möchte ich...",en:"Later I would like to...",type:"Satz 46/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Zum Schluss...",en:"Finally...",type:"Satz 47/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Insgesamt...",en:"Overall...",type:"Satz 48/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich bin damit zufrieden.",en:"I'm satisfied with that.",type:"Satz 49/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+{de:"Ich freue mich auf die Zukunft.",en:"I'm looking forward to the future.",type:"Satz 50/50",ex:"",deck:"Sprechen Teil 2: 50 Goldene Sätze"},
+// ---------- SPRECHEN TEIL 2: SATZMUSTER & NOTFALL-WÖRTER ----------
+{de:"Ich arbeite viel.",en:"I work a lot.",type:"Satzmuster 1",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Ich lese Bücher.",en:"I read books.",type:"Satzmuster 1",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Ich spiele Fußball.",en:"I play soccer.",type:"Satzmuster 1",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Ich gehe oft spazieren.",en:"I often go for a walk.",type:"Satzmuster 2",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Ich kaufe meistens im Supermarkt ein.",en:"I mostly shop at the supermarket.",type:"Satzmuster 2",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Mit meinen Freunden gehe ich ins Kino.",en:"I go to the cinema with my friends.",type:"Satzmuster 3",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Mit meiner Familie esse ich zusammen.",en:"I eat together with my family.",type:"Satzmuster 3",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Am Wochenende schlafe ich lange.",en:"On the weekend I sleep in.",type:"Satzmuster 4",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Im Urlaub besuche ich neue Orte.",en:"On vacation I visit new places.",type:"Satzmuster 4",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Zum Schluss sehe ich fern.",en:"Finally, I watch TV.",type:"Satzmuster 5",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Zum Schluss lese ich ein Buch.",en:"Finally, I read a book.",type:"Satzmuster 5",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Also...",en:"So... / Well...",type:"Notfall-Wörter",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Hm...",en:"Hmm...",type:"Notfall-Wörter",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Mal sehen...",en:"Let's see...",type:"Notfall-Wörter",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Ich denke...",en:"I think...",type:"Notfall-Wörter",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Für mich...",en:"For me...",type:"Notfall-Wörter",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+{de:"Meiner Meinung nach...",en:"In my opinion...",type:"Notfall-Wörter",ex:"",deck:"Sprechen Teil 2: Satzmuster & Notfall-Wörter"},
+// ---------- SPRECHEN TEIL 2: BEISPIEL-MONOLOGE ----------
+{de:"Thema: Was machen Sie oft am Wochenende? (Stichwörter: Sport, Freunde besuchen, wo, mit wem)",en:"Am Wochenende habe ich viel Freizeit. Meistens schlafe ich etwas länger und frühstücke in Ruhe. Danach besuche ich oft meine Freunde oder sie kommen zu mir. Wir treffen uns meistens im Park oder in der Stadt. Manchmal spielen wir Fußball oder gehen zusammen ins Kino. Am Abend sehe ich einen Film oder lese ein Buch. Das macht mir viel Spaß.",type:"Beispiel 1",ex:"",deck:"Sprechen Teil 2: Beispiel-Monologe"},
+{de:"Thema: Was machen Sie mit Ihrem Geld? (Stichwörter: Kleidung, Lebensmittel, Sparen, Reisen)",en:"Mit meinem Geld kaufe ich zuerst Lebensmittel und Kleidung. Ich spare auch jeden Monat etwas Geld. Im Urlaub gebe ich gern Geld für Reisen aus, weil ich neue Orte besuchen möchte. Ich kaufe nicht viele teure Sachen. Ich finde Sparen sehr wichtig.",type:"Beispiel 2",ex:"",deck:"Sprechen Teil 2: Beispiel-Monologe"},
+{de:"Thema: Was sind Ihre Pläne? (Stichwörter: Beruf, Familie, weiter lernen, andere Pläne)",en:"In der Zukunft habe ich viele Pläne. Ich möchte einen guten Beruf finden und weiter Deutsch lernen. Später möchte ich eine Familie haben. Ich möchte auch ins Ausland reisen und viele neue Orte kennenlernen. Das ist mein Traum.",type:"Beispiel 3",ex:"",deck:"Sprechen Teil 2: Beispiel-Monologe"},
+];
+
+SPRECHEN2.forEach((c,i)=>c.id = "t"+i);
 
 /* =========================================================
    STATE & STORAGE
    ========================================================= */
 let progress = {}; // id -> {box, due}
 let currentDeck = null;
+let currentMode = "vokabeln"; // "vokabeln" | "sprechen"
 let session = [];
 let sessionIdx = 0;
 let sessionStats = {known:0, again:0};
 let flipped = false;
 
-const STORE_KEY = "a2-progress";
+function activeWords(){
+  if(currentMode === "sprechen") return SPRECHEN;
+  if(currentMode === "sprechen2") return SPRECHEN2;
+  return WORDS;
+}
+function storeKey(){
+  if(currentMode === "sprechen") return "a2-sprechen-progress";
+  if(currentMode === "sprechen2") return "a2-sprechen2-progress";
+  return "a2-progress";
+}
 
 async function loadProgress(){
   try{
-    const r = await window.storage.get(STORE_KEY);
+    const r = await window.storage.get(storeKey());
     progress = r ? JSON.parse(r.value) : {};
   }catch(e){ progress = {}; }
 }
 async function saveProgress(){
-  try{ await window.storage.set(STORE_KEY, JSON.stringify(progress)); }catch(e){}
+  try{ await window.storage.set(storeKey(), JSON.stringify(progress)); }catch(e){}
 }
 
 function getBox(id){ return (progress[id] && progress[id].box) || 0; }
@@ -1818,11 +2322,19 @@ function markAnswer(id, correct){
 
 function deckList(){
   const decks = {};
-  WORDS.forEach(w=>{
+  activeWords().forEach(w=>{
     decks[w.deck] = decks[w.deck] || [];
     decks[w.deck].push(w);
   });
   return decks;
+}
+
+async function switchMode(mode){
+  if(mode === currentMode && currentDeck === null) return;
+  currentMode = mode;
+  currentDeck = null;
+  await loadProgress();
+  renderHome();
 }
 
 /* =========================================================
@@ -1835,13 +2347,41 @@ const backBtn = document.getElementById('backBtn');
 
 backBtn.onclick = ()=>renderHome();
 
+const MODE_META = {
+  vokabeln: {
+    tabLabel: "🗂️ Vokabeln",
+    title: "VOKABELTRAINER A2",
+    sub: "Goethe-Zertifikat · Wortliste",
+    desc: n => `${n} Wörter · komplette Goethe-A2-Liste geladen<br>Ein Wort gilt erst als <b style="color:var(--success)">gemeistert</b>, wenn du es <b>4×</b> in Folge richtig hattest — „in Arbeit" heißt: du bist dran, aber noch nicht sicher.`
+  },
+  sprechen: {
+    tabLabel: "🗣️ Teil 1",
+    title: "SPRECHEN TEIL 1",
+    sub: "Goethe-Zertifikat · Fragen & Antworten",
+    desc: n => `${n} Karten · 74 Themen aus dem Sprechen-Teil-1-Fragenkatalog<br>Karte umdrehen, deine gesprochene Antwort mit der Musterantwort vergleichen. Eine Karte gilt als <b style="color:var(--success)">sicher</b>, wenn du sie <b>4×</b> in Folge gewusst hast.`
+  },
+  sprechen2: {
+    tabLabel: "🎤 Teil 2",
+    title: "SPRECHEN TEIL 2",
+    sub: "Goethe-Zertifikat · Redemittel & Monologe",
+    desc: n => `${n} Karten · Redemittel, Zeitausdrücke, Verben, Adjektive, goldene Sätze & Beispiel-Monologe für die freie Rede (Von sich erzählen)<br>Ziel: automatisch passende Satzbausteine parat haben, statt im Kopf zu übersetzen.`
+  }
+};
+
 function renderHome(){
   currentDeck = null;
-  headerTitle.textContent = "VOKABELTRAINER A2";
-  headerSub.textContent = "Goethe-Zertifikat · Wortliste";
   backBtn.style.display = "none";
+  const meta = MODE_META[currentMode];
+  headerTitle.textContent = meta.title;
+  headerSub.textContent = meta.sub;
+  const words = activeWords();
   const decks = deckList();
-  let html = `<div class="sub" style="margin-bottom:14px;color:var(--muted);font-size:0.8rem;line-height:1.5;">${WORDS.length} Wörter · komplette Goethe-A2-Liste geladen<br>Ein Wort gilt erst als <b style="color:var(--success)">gemeistert</b>, wenn du es <b>4×</b> in Folge richtig hattest — „in Arbeit" heißt: du bist dran, aber noch nicht sicher.</div>`;
+  let html = `<div class="tabs" style="margin-bottom:16px;">`;
+  Object.keys(MODE_META).forEach(m=>{
+    html += `<div class="tab ${currentMode===m?'active':''}" onclick="switchMode('${m}')">${MODE_META[m].tabLabel}</div>`;
+  });
+  html += `</div>`;
+  html += `<div class="sub" style="margin-bottom:14px;color:var(--muted);font-size:0.8rem;line-height:1.5;">${meta.desc(words.length)}</div>`;
   Object.keys(decks).forEach(name=>{
     const words = decks[name];
     let mastered=0, learning=0, fresh=0;
@@ -1899,15 +2439,25 @@ function setMode(b){ browseMode=b; renderDeckTabs(); }
 
 function renderBrowse(words){
   let html = "";
+  const isSprechen = currentMode !== "vokabeln";
   words.forEach(w=>{
-    html += `
-      <div class="word-row">
-        <div style="flex:1;">
-          <span class="de">${w.de}</span><span class="type">${w.type}</span>
-          ${w.ex?`<div class="ex">${w.ex}</div>`:""}
-        </div>
-        <div class="en">${w.en}</div>
-      </div>`;
+    if(isSprechen){
+      html += `
+        <div class="qa-row">
+          <div class="type">${w.type}</div>
+          <div class="qa-q">${w.de}</div>
+          <div class="qa-a">${w.en}</div>
+        </div>`;
+    } else {
+      html += `
+        <div class="word-row">
+          <div style="flex:1;">
+            <span class="de">${w.de}</span><span class="type">${w.type}</span>
+            ${w.ex?`<div class="ex">${w.ex}</div>`:""}
+          </div>
+          <div class="en">${w.en}</div>
+        </div>`;
+    }
   });
   document.getElementById('deckContent').innerHTML = html;
 }
@@ -1947,6 +2497,8 @@ function renderCard(){
   flipped = false;
   const w = session[sessionIdx];
   const pct = Math.round((sessionIdx/session.length)*100);
+  const isLongCard = (w.de.length + w.en.length) > 70;
+  const isPracticeMode = currentMode !== "vokabeln";
   document.getElementById('deckContent').innerHTML = `
     <div class="session-bar">
       <span>${sessionIdx+1} / ${session.length}</span>
@@ -1954,7 +2506,7 @@ function renderCard(){
       <span>✓ ${sessionStats.known}</span>
     </div>
     <div class="flip-scene">
-      <div class="flip-card" id="flipCard" onclick="flipCard()">
+      <div class="flip-card ${isLongCard?'qa':''}" id="flipCard" onclick="flipCard()">
         <div class="face front-face">
           <div class="tag">${w.type}</div>
           <div class="box-indicator">BOX ${getBox(w.id)}</div>
@@ -1966,7 +2518,7 @@ function renderCard(){
         </div>
       </div>
     </div>
-    <div class="hint">Tippe auf die Karte zum Umdrehen</div>
+    <div class="hint">${isPracticeMode ? "Antworte laut, dann umdrehen und vergleichen" : "Tippe auf die Karte zum Umdrehen"}</div>
     <div class="answer-buttons" id="answerButtons" style="visibility:hidden;">
       <button class="ans-btn ans-again" onclick="answer(false)">✗ Nochmal</button>
       <button class="ans-btn ans-good" onclick="answer(true)">✓ Kenn ich</button>
@@ -2007,6 +2559,7 @@ window.startSession = startSession;
 window.flipCard = flipCard;
 window.answer = answer;
 window.renderDeckTabs = renderDeckTabs;
+window.switchMode = switchMode;
 
 /* =========================================================
    INIT
